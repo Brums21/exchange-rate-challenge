@@ -1,31 +1,41 @@
 package com.exchangeRateChallenge.exchangeRateAPI.service;
 
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import com.exchangeRateChallenge.exchangeRateAPI.exceptions.BadRequestException;
 import com.exchangeRateChallenge.exchangeRateAPI.exceptions.ExchangeAPIException;
-import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeCurrency;
+import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRate;
 import com.exchangeRateChallenge.exchangeRateAPI.services.ExchangeAPIService;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
-@ExtendWith(MockitoExtension.class)
 public class ExchangeAPIServiceTest {
     
     private ExchangeAPIService exchangeAPIService;
 
     private static MockWebServer mockWebServer;
+
+    private static final String successBody = 
+        "{\"success\": true,"
+        + "\"terms\": \"https://exchangerate.host/terms\","
+        + "\"privacy\": \"https://exchangerate.host/privacy\","
+        + "\"timestamp\": 1430401802,"
+        + "\"source\": \"USD\","
+        + "\"quotes\": {"
+        + "\"USDAED\": 3.672982,"
+        + "\"USDAFN\": 57.8936,"
+        + "\"USDEUR\": 0.85"
+        + "}}";
 
     @BeforeAll
     static void setUp() throws IOException{
@@ -53,23 +63,9 @@ public class ExchangeAPIServiceTest {
         String fromCurrency = "USD";
         String toCurrency = "EUR";
         
-        mockWebServer.enqueue(new MockResponse()
-            .addHeader("Content-Type", "application/json")
-            .setBody(
-                "{\"success\": true,"
-                + "\"terms\": \"https://exchangerate.host/terms\","
-                + "\"privacy\": \"https://exchangerate.host/privacy\","
-                + "\"timestamp\": 1430401802,"
-                + "\"source\": \"USD\","
-                + "\"quotes\": {"
-                + "\"USDAED\": 3.672982,"
-                + "\"USDAFN\": 57.8936,"
-                + "\"USDEUR\": 0.85"
-                + "}}"
-            )
-        );
+        mockWebServer.enqueue(jsonResponse(200, successBody));
 
-        ExchangeCurrency exchangeCurrent = exchangeAPIService.getExchangeRateFromToCurrency(fromCurrency, toCurrency);
+        ExchangeRate exchangeCurrent = exchangeAPIService.getExchangeRateFromToCurrency(fromCurrency, toCurrency);
         assertTrue(exchangeCurrent.getRate() == 0.85);
         assertTrue(exchangeCurrent.getFromCurrency().equals("USD"));
         assertTrue(exchangeCurrent.getToCurrency().equals("EUR"));
@@ -82,28 +78,14 @@ public class ExchangeAPIServiceTest {
         String fromCurrency = "USD";
         String toCurrency = "INVALID";
 
-        mockWebServer.enqueue(new MockResponse()
-            .addHeader("Content-Type", "application/json")
-            .setBody(
-                "{\"success\": true,"
-                + "\"terms\": \"https://exchangerate.host/terms\","
-                + "\"privacy\": \"https://exchangerate.host/privacy\","
-                + "\"timestamp\": 1430401802,"
-                + "\"source\": \"USD\","
-                + "\"quotes\": {"
-                + "\"USDAED\": 3.672982,"
-                + "\"USDAFN\": 57.8936,"
-                + "\"USDEUR\": 0.85"
-                + "}}"
-            )
+        mockWebServer.enqueue(jsonResponse(200, successBody));
+
+        BadRequestException ex = assertThrows(
+            BadRequestException.class,
+            () -> exchangeAPIService.getExchangeRateFromToCurrency(fromCurrency, toCurrency)
         );
 
-        try {
-            exchangeAPIService.getExchangeRateFromToCurrency(fromCurrency, toCurrency);
-        } catch (Exception e) {
-            assertTrue(e instanceof BadRequestException);
-            assertTrue(e.getMessage().equals("Exchange rate not found from currency " + fromCurrency + " to currency " + toCurrency));
-        }
+        assertTrue(ex.getMessage().equals("Exchange rate not found from currency " + fromCurrency + " to currency " + toCurrency));
     }
 
     @Test
@@ -111,25 +93,22 @@ public class ExchangeAPIServiceTest {
         
         String fromCurrency = "USD";
 
-        mockWebServer.enqueue(new MockResponse()
-            .setResponseCode(401)
-            .addHeader("Content-Type", "application/json")
-            .setBody(
-                "{\"success\": false,"
+        mockWebServer.enqueue(jsonResponse(
+            401,
+            "{\"success\": false,"
                 + "\"error\": {"
                 + "\"code\": 101,"
                 + "\"type\": \"invalid_access_key\","
                 + "\"info\": \"You have not supplied a valid API Access Key.\""
                 + "}}"
-            )
+        ));
+
+        ExchangeAPIException ex = assertThrows(
+            ExchangeAPIException.class,
+            () -> exchangeAPIService.getExchangeRate(fromCurrency)
         );
 
-        try {
-            exchangeAPIService.getExchangeRate(fromCurrency);
-        } catch (Exception e) {
-            assertTrue(e instanceof ExchangeAPIException);
-            assertTrue(e.getMessage().equals("The provided API key was not provided or is invalid."));
-        }
+        assertTrue(ex.getMessage().equals("The provided API key was not provided or is invalid."));
     }
 
     @Test
@@ -137,56 +116,75 @@ public class ExchangeAPIServiceTest {
         
         String fromCurrency = "USD";
 
-        mockWebServer.enqueue(new MockResponse()
-            .setResponseCode(502)
-            .addHeader("Content-Type", "application/json")
+        mockWebServer.enqueue(jsonResponse(502, ""));
+
+        ExchangeAPIException ex = assertThrows(
+            ExchangeAPIException.class,
+            () -> exchangeAPIService.getExchangeRate(fromCurrency)
         );
 
-        try {
-            exchangeAPIService.getExchangeRate(fromCurrency);
-        } catch (Exception e) {
-            assertTrue(e instanceof ExchangeAPIException);
-            assertTrue(e.getMessage().equals("Server error 502 BAD_GATEWAY"));
-        }
+        assertTrue(ex.getMessage().equals("Server error 502 BAD_GATEWAY"));
+
     }
 
     @Test
     public void givenGetExchangeRate_when4xxErrorOccurs_thenThrowExchangeAPIException() {
         
         String fromCurrency = "USD";
+        mockWebServer.enqueue(jsonResponse(404, ""));
 
-        mockWebServer.enqueue(new MockResponse()
-            .setResponseCode(404)
-            .addHeader("Content-Type", "application/json")
+        ExchangeAPIException ex = assertThrows(
+            ExchangeAPIException.class,
+            () -> exchangeAPIService.getExchangeRate(fromCurrency)
         );
 
-        try {
-            exchangeAPIService.getExchangeRate(fromCurrency);
-        } catch (Exception e) {
-            assertTrue(e instanceof ExchangeAPIException);
-            assertTrue(e.getMessage().equals("Client error 404 NOT_FOUND"));
-        }
+        assertTrue(ex.getMessage().equals("Client error 404 NOT_FOUND"));
+
     }
 
     @Test
-    public void givenExchangeAPIService_whenApiKeyIsMissing_thenThrowIllegalStateException() {
+    public void givenExchangeAPIServiceConstructor_whenApiKeyIsMissing_thenThrowIllegalStateException() {
         WebClient webClient = WebClient.builder()
             .baseUrl(mockWebServer.url("/").toString())
             .build();
-        
-        try {
-            new ExchangeAPIService(webClient, "   ");
-        } catch (Exception e) {
-            assertTrue(e instanceof IllegalStateException);
-            assertTrue(e.getMessage().equals("Missing configuration: exchangeAPI (API key) is not set"));
-        }
 
-        try {
-            new ExchangeAPIService(webClient, null);
-        } catch (Exception e) {
-            assertTrue(e instanceof IllegalStateException);
-            assertTrue(e.getMessage().equals("Missing configuration: exchangeAPI (API key) is not set"));
-        }
+        IllegalStateException exceptionKeyEmpty = assertThrows(
+            IllegalStateException.class,
+            () -> new ExchangeAPIService(webClient, " ")
+        );
+
+        IllegalStateException exceptionKeyNull = assertThrows(
+            IllegalStateException.class,
+            () -> new ExchangeAPIService(webClient, null)
+        );
+
+        String missingAPIMessage = "Missing configuration: exchangeAPI (API key) is not set";
+
+        assertTrue(exceptionKeyEmpty.getMessage().equals(missingAPIMessage));
+        assertTrue(exceptionKeyNull.getMessage().equals(missingAPIMessage));
+
+    }
+
+    @Test
+    public void givenGetExchangeRatesFromCurrency_whenValidInput_thenReturnAllValues() {
+        
+        String fromCurrency = "USD";
+        
+        mockWebServer.enqueue(jsonResponse(200, successBody));
+
+        var exchangeRates = exchangeAPIService.getExchangeRatesFromCurrency(fromCurrency);
+        assertTrue(exchangeRates.getFromCurrency().equals("USD"));
+        assertTrue(exchangeRates.getRates().get("EUR") == 0.85);
+        assertTrue(exchangeRates.getRates().get("AED") == 3.672982);
+        assertTrue(exchangeRates.getRates().get("AFN") == 57.8936);
+    
+    }
+
+    private static MockResponse jsonResponse(int code, String body) {
+        return new MockResponse()
+            .setResponseCode(code)
+            .addHeader("Content-Type", "application/json")
+            .setBody(body);
     }
 
 }

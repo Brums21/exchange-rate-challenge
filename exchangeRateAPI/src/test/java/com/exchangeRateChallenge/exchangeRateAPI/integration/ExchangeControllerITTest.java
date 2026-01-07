@@ -24,7 +24,20 @@ public class ExchangeControllerITTest {
 
     private WireMockServer wireMockServer;
 
-    private static final String BASE_URL = "http://localhost:%d/api/v1/exchange/exchange-rate";
+    private static final String RATE_URL = "http://localhost:%d/api/v1/exchange/rate";
+    private static final String RATES_URL = "http://localhost:%d/api/v1/exchange/rates";
+
+    private static final String MODEL_RESPONSE = "{"
+        + "\"success\": true,"
+        + "\"terms\": \"https://exchangerate.host/terms\","
+        + "\"privacy\": \"https://exchangerate.host/privacy\","
+        + "\"timestamp\": 1430401802,"
+        + "\"source\": \"USD\","
+        + "\"quotes\": {"
+        + "\"USDAED\": 3.672982,"
+        + "\"USDAFN\": 57.8936,"
+        + "\"USDEUR\": 0.85"
+        + "}}";
 
    @LocalServerPort
     private int port;
@@ -47,24 +60,10 @@ public class ExchangeControllerITTest {
         String baseCurrency = "USD";
         String targetCurrency = "EUR";
 
-        stubFor(get(urlPathEqualTo("/live"))
-            .withQueryParam("access_key", equalTo("dummy"))
-            .withQueryParam("source", equalTo(baseCurrency))
-            .willReturn(aResponse()
-                .withHeader("Content-Type", "application/json")
-                .withBody("{\"success\": true,"
-                + "\"terms\": \"https://exchangerate.host/terms\","
-                + "\"privacy\": \"https://exchangerate.host/privacy\","
-                + "\"timestamp\": 1430401802,"
-                + "\"source\": \"USD\","
-                + "\"quotes\": {"
-                + "\"USDAED\": 3.672982,"
-                + "\"USDAFN\": 57.8936,"
-                + "\"USDEUR\": 0.85"
-                + "}}")));
+        stubWireMockForExchangeAPI(baseCurrency, MODEL_RESPONSE, 200);
 
         RestAssured.when()
-            .get(String.format(BASE_URL+"?from=%s&to=%s", port, baseCurrency, targetCurrency))
+            .get(String.format(RATE_URL+"?from=%s&to=%s", port, baseCurrency, targetCurrency))
             .then()
             .statusCode(200)
             .body("rate", is(0.85f))
@@ -79,24 +78,10 @@ public class ExchangeControllerITTest {
         String baseCurrency = "USD";
         String targetCurrency = "INVALID";
 
-        stubFor(get(urlPathEqualTo("/live"))
-            .withQueryParam("access_key", equalTo("dummy"))
-            .withQueryParam("source", equalTo(baseCurrency))
-            .willReturn(aResponse()
-                .withHeader("Content-Type", "application/json")
-                .withBody("{\"success\": true,"
-                + "\"terms\": \"https://exchangerate.host/terms\","
-                + "\"privacy\": \"https://exchangerate.host/privacy\","
-                + "\"timestamp\": 1430401802,"
-                + "\"source\": \"USD\","
-                + "\"quotes\": {"
-                + "\"USDAED\": 3.672982,"
-                + "\"USDAFN\": 57.8936,"
-                + "\"USDEUR\": 0.85"
-                + "}}")));
+        stubWireMockForExchangeAPI(baseCurrency, MODEL_RESPONSE, 200);
 
         RestAssured.when()
-            .get(String.format(BASE_URL+"?from=%s&to=%s", port, baseCurrency, targetCurrency))
+            .get(String.format(RATE_URL+"?from=%s&to=%s", port, baseCurrency, targetCurrency))
             .then()
             .statusCode(400);
     }
@@ -107,31 +92,79 @@ public class ExchangeControllerITTest {
         String baseCurrency = "USD";
         String targetCurrency = "EUR";
 
-        stubFor(get(urlPathEqualTo("/live"))
-            .withQueryParam("access_key", equalTo("dummy"))
-            .withQueryParam("source", equalTo(baseCurrency))
-            .willReturn(aResponse()
-                .withStatus(502)));
+        stubWireMockForExchangeAPI(baseCurrency, "", 502);
 
         RestAssured.when()
-            .get(String.format(BASE_URL+"?from=%s&to=%s", port, baseCurrency, targetCurrency))
+            .get(String.format(RATE_URL+"?from=%s&to=%s", port, baseCurrency, targetCurrency))
             .then()
             .statusCode(502);
     }
 
     @Test
-    public void givenGetExchangeRate_whenMissingParameters_ReturnBadRequest() {
+    public void givenGetExchangeRate_whenMissingParameter_ReturnBadRequest() {
 
         RestAssured.when()
-            .get(String.format(BASE_URL+"?from=USD", port))
+            .get(String.format(RATE_URL+"?from=USD", port))
             .then()
             .statusCode(400)
             .body("error", is("Bad Request"));
 
         RestAssured.when()
-            .get(String.format(BASE_URL+"?to=EUR", port))
+            .get(String.format(RATE_URL+"?to=EUR", port))
             .then()
             .statusCode(400)
             .body("error", is("Bad Request"));
     }
+
+    @Test
+    public void givenGetExchangeRates_whenValidBaseCurrency_ReturnCorrectRates() {
+
+        String baseCurrency = "USD";
+
+        stubWireMockForExchangeAPI(baseCurrency, MODEL_RESPONSE, 200);
+
+        RestAssured.when()
+            .get(String.format(RATES_URL+"?from=%s", port, baseCurrency))
+            .then()
+            .statusCode(200)
+            .body("fromCurrency", is(baseCurrency))
+            .body("rates.EUR", is(0.85f))
+            .body("rates.AED", is(3.672982f))
+            .body("rates.AFN", is(57.8936f));
+    }
+
+    @Test
+    public void givenGetExchangeRates_whenExchangeAPIReturnsServerError_ReturnInternalServerError() {
+
+        String baseCurrency = "USD";
+
+        stubWireMockForExchangeAPI(baseCurrency, "", 502);
+
+
+        RestAssured.when()
+            .get(String.format(RATES_URL+"?from=%s", port, baseCurrency))
+            .then()
+            .statusCode(502);
+    }
+
+    @Test
+    public void givenGetExchangeRates_whenMissingParameter_ReturnBadRequest() {
+
+        RestAssured.when()
+            .get(String.format(RATES_URL, port))
+            .then()
+            .statusCode(400)
+            .body("error", is("Bad Request"));
+    }
+
+    private void stubWireMockForExchangeAPI(String baseCurrency, String responseBody, int code) {
+        stubFor(get(urlPathEqualTo("/live"))
+            .withQueryParam("access_key", equalTo("dummy"))
+            .withQueryParam("source", equalTo(baseCurrency))
+            .willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody(responseBody)
+                .withStatus(code)));
+    }
+
 }

@@ -9,8 +9,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.exchangeRateChallenge.exchangeRateAPI.exceptions.BadRequestException;
 import com.exchangeRateChallenge.exchangeRateAPI.exceptions.ExchangeAPIException;
-import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeCurrency;
-import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeDetailsDTO;
+import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRate;
+import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRates;
+import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeApiResponseDTO;
 
 import reactor.core.publisher.Mono;
 
@@ -31,25 +32,48 @@ public class ExchangeAPIService {
         }
     }
 
-    public ExchangeCurrency getExchangeRateFromToCurrency(String fromCurrency, String toCurrency) {
+    private static String cleanString(String currency) {
+        return currency.trim()
+            .replaceAll("^\"+", "")
+            .replaceAll("\"+$", "")
+            .replaceAll("\'+", "")
+            .replaceAll("\'+$", "")
+            .toUpperCase();
+    }
+
+    public ExchangeRate getExchangeRateFromToCurrency(String fromCurrency, String toCurrency) {
+
+        fromCurrency = cleanString(fromCurrency);
+        toCurrency = cleanString(toCurrency);
 
         LOGGER.info("Fetching exchange rate from {} to {}", fromCurrency, toCurrency);
 
-        ExchangeDetailsDTO exchangeDetailsDTO = getExchangeRate(fromCurrency);
+        ExchangeApiResponseDTO exchangeDetailsDTO = getExchangeRate(fromCurrency);
         Double rate = exchangeDetailsDTO.getRates().get(toCurrency);
 
         if (rate == null) {
             throw new BadRequestException("Exchange rate not found from currency " + fromCurrency + " to currency " + toCurrency);
         }
 
-        return new ExchangeCurrency(fromCurrency, toCurrency, rate);
+        return new ExchangeRate(fromCurrency, toCurrency, rate);
+    }
+
+    public ExchangeRates getExchangeRatesFromCurrency(String fromCurrency) {
+        
+        fromCurrency = cleanString(fromCurrency);
+
+        LOGGER.info("Fetching exchange rates from {}", fromCurrency);
+
+        ExchangeApiResponseDTO exchangeDetailsDTO = getExchangeRate(fromCurrency);
+
+        return new ExchangeRates(fromCurrency, exchangeDetailsDTO.getRates());
     }
     
-    public ExchangeDetailsDTO getExchangeRate(String fromCurrency) {
+    public ExchangeApiResponseDTO getExchangeRate(String fromCurrency) {
 
         LOGGER.info("Fetching exchange rate from {}", fromCurrency);
 
-        ExchangeDetailsDTO exchangeDetailsDTO = webClient.get()
+        ExchangeApiResponseDTO exchangeDetailsDTO = webClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/live")
                 .queryParam("access_key", apiKey.trim())
@@ -66,7 +90,7 @@ public class ExchangeAPIService {
             .onStatus(HttpStatusCode::is5xxServerError, response ->
                 Mono.error(new ExchangeAPIException("Server error " + response.statusCode()))
             )
-            .bodyToMono(ExchangeDetailsDTO.class)
+            .bodyToMono(ExchangeApiResponseDTO.class)
             .doOnSuccess(dto -> LOGGER.info("Received response: {}", dto))
             .block();
 

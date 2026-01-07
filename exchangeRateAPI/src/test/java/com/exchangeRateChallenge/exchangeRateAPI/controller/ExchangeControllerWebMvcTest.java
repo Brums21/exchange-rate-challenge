@@ -8,11 +8,16 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.exchangeRateChallenge.exchangeRateAPI.controllers.ExchangeController;
 import com.exchangeRateChallenge.exchangeRateAPI.exceptions.BadRequestException;
 import com.exchangeRateChallenge.exchangeRateAPI.exceptions.ExchangeAPIException;
-import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeCurrency;
+import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRate;
+import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRates;
 import com.exchangeRateChallenge.exchangeRateAPI.services.ExchangeAPIService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +25,9 @@ import org.junit.jupiter.api.Test;
 
 @WebMvcTest(ExchangeController.class)
 public class ExchangeControllerWebMvcTest {
+
+    public static final String RATE_URL = "/api/v1/exchange/rate";
+    public static final String RATES_URL = "/api/v1/exchange/rates";
     
     @Autowired
     private MockMvc mockMvc;
@@ -28,17 +36,17 @@ public class ExchangeControllerWebMvcTest {
     private ExchangeAPIService exchangeService;
 
     @Test
-    public void givenGetExchangeRate_whenValidParametersAreProvided_thenReturnExchangeRate() throws Exception {
+    public void givenGetExchangeRateFromAToB_whenValidParametersAreProvided_thenReturnExchangeRate() throws Exception {
 
         String fromCurrency = "USD";
         String toCurrency = "EUR";
         double mockRate = 0.85;
 
-        ExchangeCurrency mockRateObj = new ExchangeCurrency(fromCurrency, toCurrency, mockRate);
+        ExchangeRate mockRateObj = new ExchangeRate(fromCurrency, toCurrency, mockRate);
 
         when(exchangeService.getExchangeRateFromToCurrency(fromCurrency, toCurrency)).thenReturn(mockRateObj);
 
-        mockMvc.perform(get("/api/v1/exchange/exchange-rate")
+        mockMvc.perform(get(RATE_URL)
                 .param("from", fromCurrency)
                 .param("to", toCurrency))
                 .andExpect(status().isOk())
@@ -48,42 +56,64 @@ public class ExchangeControllerWebMvcTest {
     }
 
     @Test
-    public void givenGetExchangeRate_whenMissingParametersAreProvided_thenReturnBadRequest() throws Exception {
-        mockMvc.perform(get("/api/v1/exchange/exchange-rate")
+    public void givenGetExchangeRateFromAToB_whenMissingParametersAreProvided_thenReturnBadRequest() throws Exception {
+        mockMvc.perform(get(RATE_URL)
                 .param("from", "USD"))
                 .andExpect(status().isBadRequest());
 
-        mockMvc.perform(get("/api/v1/exchange/exchange-rate")
+        mockMvc.perform(get(RATE_URL)
                 .param("to", "EUR"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void givenGetExchangeRate_whenFromCurrecyIsInvalid_thenReturnBadRequest() throws Exception {
+    public void givenGetExchangeRateFromAToB_whenFromCurrecyIsInvalid_thenReturnBadRequest() throws Exception {
         String fromCurrency = "INVALID";
         String toCurrency = "EUR";
 
         when(exchangeService.getExchangeRateFromToCurrency(fromCurrency, toCurrency))
             .thenThrow(new BadRequestException("Exchange rate not found from currency " + fromCurrency + " to currency " + toCurrency));
 
-        mockMvc.perform(get("/api/v1/exchange/exchange-rate")
+        mockMvc.perform(get(RATE_URL)
                 .param("from", fromCurrency)
                 .param("to", toCurrency))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    public void givenGetExchangeRate_whenExchangeAPIReturnsServerError_thenReturnInternalServerError() throws Exception {
+    public void givenGetExchangeRateFromAToB_whenExchangeAPIReturnsServerError_thenReturnInternalServerError() throws Exception {
+        
         String fromCurrency = "USD";
         String toCurrency = "EUR";
 
         when(exchangeService.getExchangeRateFromToCurrency(fromCurrency, toCurrency))
             .thenThrow(new ExchangeAPIException("Server error: 502 BAD_GATEWAY"));
 
-        mockMvc.perform(get("/api/v1/exchange/exchange-rate")
+        mockMvc.perform(get(RATE_URL)
                 .param("from", fromCurrency)
                 .param("to", toCurrency))
                 .andExpect(status().is5xxServerError());
     }
+
+    @Test
+    public void givenGetExchangeRateFromA_whenValidParametersAreProvided_thenReturnExchangeRate() throws Exception {
+
+        String fromCurrency = "USD";
+        Map<String, Double> rates = new HashMap<>();
+        rates.put("EUR", 0.85);
+        rates.put("GBP", 0.75);
+
+        ExchangeRates mockRateObj = new ExchangeRates(fromCurrency, rates);
+
+        when(exchangeService.getExchangeRatesFromCurrency(fromCurrency)).thenReturn(mockRateObj);
+
+        mockMvc.perform(get(RATES_URL)
+                .param("from", fromCurrency))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rates").value(rates))
+                .andExpect(jsonPath("$.fromCurrency").value(fromCurrency));
+    }
+
+
 
 }

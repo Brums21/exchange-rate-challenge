@@ -11,7 +11,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ExchangeCurrency {
+public class ExchangeRate {
     
     private String fromCurrency;
     private String toCurrency;
