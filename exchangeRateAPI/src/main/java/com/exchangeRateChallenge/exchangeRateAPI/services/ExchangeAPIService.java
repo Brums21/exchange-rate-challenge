@@ -11,6 +11,7 @@ import com.exchangeRateChallenge.exchangeRateAPI.exceptions.BadRequestException;
 import com.exchangeRateChallenge.exchangeRateAPI.exceptions.ExchangeAPIException;
 import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRate;
 import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRates;
+import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeAPISymbolsDTO;
 import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeApiResponseDTO;
 
 import reactor.core.publisher.Mono;
@@ -32,19 +33,12 @@ public class ExchangeAPIService {
         }
     }
 
-    private static String cleanString(String currency) {
-        return currency.trim()
-            .replaceAll("^\"+", "")
-            .replaceAll("\"+$", "")
-            .replaceAll("\'+", "")
-            .replaceAll("\'+$", "")
-            .toUpperCase();
-    }
-
     public ExchangeRate getExchangeRateFromToCurrency(String fromCurrency, String toCurrency) {
 
-        fromCurrency = cleanString(fromCurrency);
-        toCurrency = cleanString(toCurrency);
+        ExchangeAPISymbolsDTO symbolsDTO = getAcceptedSymbols();
+
+        fromCurrency = cleanAndValidateCurrency(fromCurrency, symbolsDTO);
+        toCurrency = cleanAndValidateCurrency(toCurrency, symbolsDTO);
 
         LOGGER.info("Fetching exchange rate from {} to {}", fromCurrency, toCurrency);
 
@@ -60,10 +54,11 @@ public class ExchangeAPIService {
 
     public ExchangeRates getExchangeRatesFromCurrency(String fromCurrency) {
         
-        fromCurrency = cleanString(fromCurrency);
+        ExchangeAPISymbolsDTO symbolsDTO = getAcceptedSymbols();
+
+        fromCurrency = cleanAndValidateCurrency(fromCurrency, symbolsDTO);
 
         LOGGER.info("Fetching exchange rates from {}", fromCurrency);
-
         ExchangeApiResponseDTO exchangeDetailsDTO = getExchangeRate(fromCurrency);
 
         return new ExchangeRates(fromCurrency, exchangeDetailsDTO.getRates());
@@ -95,5 +90,47 @@ public class ExchangeAPIService {
             .block();
 
         return exchangeDetailsDTO;
+    }
+
+    public ExchangeAPISymbolsDTO getAcceptedSymbols() {
+        LOGGER.info("Fetching accepted symbols");
+
+        ExchangeAPISymbolsDTO symbolsDTO = webClient.get()
+            .uri(uriBuilder -> uriBuilder
+                .path("/list")
+                .queryParam("access_key", apiKey.trim())
+                .build()
+            )
+            .retrieve()
+            .onStatus(status -> (status.value() == 401), response ->
+                Mono.error(new ExchangeAPIException("The provided API key was not provided or is invalid."))
+            )
+            .onStatus(HttpStatusCode::is5xxServerError, response ->
+                Mono.error(new ExchangeAPIException("Server error " + response.statusCode()))
+            )
+            .bodyToMono(ExchangeAPISymbolsDTO.class)
+            .doOnSuccess(dto -> LOGGER.info("Received symbols response: {}", dto))
+            .block();
+
+        return symbolsDTO;
+
+    }
+    
+    private static String cleanString(String currency) {
+        return currency.trim()
+            .replaceAll("^\"+", "")
+            .replaceAll("\"+$", "")
+            .replaceAll("\'+", "")
+            .replaceAll("\'+$", "")
+            .toUpperCase();
+    }
+
+    private static String cleanAndValidateCurrency(String currency, ExchangeAPISymbolsDTO symbolsDTO) {
+        currency = cleanString(currency);
+        if (!symbolsDTO.hasSymbol(currency)) {
+            throw new BadRequestException("Currency " + currency + " is not accepted");
+        }
+
+        return currency;
     }
 }

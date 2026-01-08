@@ -39,6 +39,17 @@ public class ExchangeControllerITTest {
         + "\"USDEUR\": 0.85"
         + "}}";
 
+    private static final String SYMBOLS_MODEL_RESPONSE = "{"
+        + "\"success\": true,"
+        + "\"terms\": \"https://exchangerate.host/terms\","
+        + "\"privacy\": \"https://exchangerate.host/privacy\","
+        + "\"currencies\": {"
+        + "\"USD\": \"United States Dollar\","
+        + "\"EUR\": \"Euro\","
+        + "\"AED\": \"United Arab Emirates Dirham\","
+        + "\"AFN\": \"Afghan Afghani\""
+        + "}}";
+
    @LocalServerPort
     private int port;
 
@@ -60,7 +71,8 @@ public class ExchangeControllerITTest {
         String baseCurrency = "USD";
         String targetCurrency = "EUR";
 
-        stubWireMockForExchangeAPI(baseCurrency, MODEL_RESPONSE, 200);
+        stubListEndpointForExchangeAPI(SYMBOLS_MODEL_RESPONSE, 200);
+        stubLiveEndpointForExchangeAPI(baseCurrency, MODEL_RESPONSE, 200);
 
         RestAssured.when()
             .get(String.format(RATE_URL+"?from=%s&to=%s", port, baseCurrency, targetCurrency))
@@ -73,17 +85,28 @@ public class ExchangeControllerITTest {
     }
 
     @Test
-    public void givenGetExchangeRate_whenInvalidTargetCurrency_ReturnBadRequest() {
+    public void givenGetExchangeRate_whenInvalidBaseOrTargetCurrency_ReturnBadRequest() {
 
-        String baseCurrency = "USD";
-        String targetCurrency = "INVALID";
+        String baseCurrency = "INVALID";
+        String targetCurrency = "BASE";
 
-        stubWireMockForExchangeAPI(baseCurrency, MODEL_RESPONSE, 200);
+        stubListEndpointForExchangeAPI(SYMBOLS_MODEL_RESPONSE, 200);
 
         RestAssured.when()
             .get(String.format(RATE_URL+"?from=%s&to=%s", port, baseCurrency, targetCurrency))
             .then()
             .statusCode(400);
+
+        baseCurrency = "USD";
+        targetCurrency = "INVALID";
+
+        stubListEndpointForExchangeAPI(SYMBOLS_MODEL_RESPONSE, 200);
+
+        RestAssured.when()
+            .get(String.format(RATE_URL+"?from=%s&to=%s", port, baseCurrency, targetCurrency))
+            .then()
+            .statusCode(400);
+
     }
 
     @Test
@@ -92,7 +115,7 @@ public class ExchangeControllerITTest {
         String baseCurrency = "USD";
         String targetCurrency = "EUR";
 
-        stubWireMockForExchangeAPI(baseCurrency, "", 502);
+        stubListEndpointForExchangeAPI("", 502);
 
         RestAssured.when()
             .get(String.format(RATE_URL+"?from=%s&to=%s", port, baseCurrency, targetCurrency))
@@ -121,7 +144,8 @@ public class ExchangeControllerITTest {
 
         String baseCurrency = "USD";
 
-        stubWireMockForExchangeAPI(baseCurrency, MODEL_RESPONSE, 200);
+        stubListEndpointForExchangeAPI(SYMBOLS_MODEL_RESPONSE, 200);
+        stubLiveEndpointForExchangeAPI(baseCurrency, MODEL_RESPONSE, 200);
 
         RestAssured.when()
             .get(String.format(RATES_URL+"?from=%s", port, baseCurrency))
@@ -138,8 +162,8 @@ public class ExchangeControllerITTest {
 
         String baseCurrency = "USD";
 
-        stubWireMockForExchangeAPI(baseCurrency, "", 502);
-
+        stubListEndpointForExchangeAPI(SYMBOLS_MODEL_RESPONSE, 200);
+        stubLiveEndpointForExchangeAPI(baseCurrency, "", 502);
 
         RestAssured.when()
             .get(String.format(RATES_URL+"?from=%s", port, baseCurrency))
@@ -157,10 +181,19 @@ public class ExchangeControllerITTest {
             .body("error", is("Bad Request"));
     }
 
-    private void stubWireMockForExchangeAPI(String baseCurrency, String responseBody, int code) {
+    private void stubLiveEndpointForExchangeAPI(String baseCurrency, String responseBody, int code) {
         stubFor(get(urlPathEqualTo("/live"))
             .withQueryParam("access_key", equalTo("dummy"))
             .withQueryParam("source", equalTo(baseCurrency))
+            .willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody(responseBody)
+                .withStatus(code)));
+    }
+
+    private void stubListEndpointForExchangeAPI(String responseBody, int code) {
+        stubFor(get(urlPathEqualTo("/list"))
+            .withQueryParam("access_key", equalTo("dummy"))
             .willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody(responseBody)
