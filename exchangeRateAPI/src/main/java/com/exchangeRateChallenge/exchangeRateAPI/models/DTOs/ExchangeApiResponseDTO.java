@@ -14,7 +14,7 @@ import lombok.ToString;
 @Setter
 @NoArgsConstructor
 @ToString
-public class ExchangeApiResponseDTO {
+public class ExchangeAPIResponseDTO {
 
     @JsonProperty("quotes")
     private Map<String, Double> rates;
@@ -22,7 +22,7 @@ public class ExchangeApiResponseDTO {
     @JsonProperty("source")
     private String sourceCurrency;
 
-    public ExchangeApiResponseDTO(Map<String, Double> rates, String sourceCurrency) {
+    public ExchangeAPIResponseDTO(Map<String, Double> rates, String sourceCurrency) {
         
         this.rates = rates.entrySet().stream()
             .collect(

@@ -7,24 +7,21 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.exchangeRateChallenge.exchangeRateAPI.exceptions.BadRequestException;
 import com.exchangeRateChallenge.exchangeRateAPI.exceptions.ExchangeAPIException;
-import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRate;
-import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRates;
 import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeAPISymbolsDTO;
-import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeApiResponseDTO;
+import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeAPIResponseDTO;
 
 import reactor.core.publisher.Mono;
 
 @Service
-public class ExchangeAPIService {
+public class ExchangeExternalAPIService {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeAPIService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeExternalAPIService.class);
 
     private final WebClient webClient;
     private final String apiKey;
 
-    public ExchangeAPIService(WebClient webClient, @Value("${exchangeAPI}") String apiKey) {
+    public ExchangeExternalAPIService(WebClient webClient, @Value("${exchangeAPI}") String apiKey) {
         this.webClient = webClient;
         this.apiKey = apiKey;
 
@@ -32,43 +29,12 @@ public class ExchangeAPIService {
             throw new IllegalStateException("Missing configuration: exchangeAPI (API key) is not set");
         }
     }
-
-    public ExchangeRate getExchangeRateFromToCurrency(String fromCurrency, String toCurrency) {
-
-        ExchangeAPISymbolsDTO symbolsDTO = getAcceptedSymbols();
-
-        fromCurrency = cleanAndValidateCurrency(fromCurrency, symbolsDTO);
-        toCurrency = cleanAndValidateCurrency(toCurrency, symbolsDTO);
-
-        LOGGER.info("Fetching exchange rate from {} to {}", fromCurrency, toCurrency);
-
-        ExchangeApiResponseDTO exchangeDetailsDTO = getExchangeRate(fromCurrency);
-        Double rate = exchangeDetailsDTO.getRates().get(toCurrency);
-
-        if (rate == null) {
-            throw new BadRequestException("Exchange rate not found from currency " + fromCurrency + " to currency " + toCurrency);
-        }
-
-        return new ExchangeRate(fromCurrency, toCurrency, rate);
-    }
-
-    public ExchangeRates getExchangeRatesFromCurrency(String fromCurrency) {
-        
-        ExchangeAPISymbolsDTO symbolsDTO = getAcceptedSymbols();
-
-        fromCurrency = cleanAndValidateCurrency(fromCurrency, symbolsDTO);
-
-        LOGGER.info("Fetching exchange rates from {}", fromCurrency);
-        ExchangeApiResponseDTO exchangeDetailsDTO = getExchangeRate(fromCurrency);
-
-        return new ExchangeRates(fromCurrency, exchangeDetailsDTO.getRates());
-    }
     
-    public ExchangeApiResponseDTO getExchangeRate(String fromCurrency) {
+    public ExchangeAPIResponseDTO getExchangeRate(String fromCurrency) {
 
         LOGGER.info("Fetching exchange rate from {}", fromCurrency);
 
-        ExchangeApiResponseDTO exchangeDetailsDTO = webClient.get()
+        ExchangeAPIResponseDTO exchangeDetailsDTO = webClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/live")
                 .queryParam("access_key", apiKey.trim())
@@ -85,7 +51,7 @@ public class ExchangeAPIService {
             .onStatus(HttpStatusCode::is5xxServerError, response ->
                 Mono.error(new ExchangeAPIException("Server error " + response.statusCode()))
             )
-            .bodyToMono(ExchangeApiResponseDTO.class)
+            .bodyToMono(ExchangeAPIResponseDTO.class)
             .doOnSuccess(dto -> LOGGER.info("Received response: {}", dto))
             .block();
 
@@ -116,21 +82,4 @@ public class ExchangeAPIService {
 
     }
     
-    private static String cleanString(String currency) {
-        return currency.trim()
-            .replaceAll("^\"+", "")
-            .replaceAll("\"+$", "")
-            .replaceAll("\'+", "")
-            .replaceAll("\'+$", "")
-            .toUpperCase();
-    }
-
-    private static String cleanAndValidateCurrency(String currency, ExchangeAPISymbolsDTO symbolsDTO) {
-        currency = cleanString(currency);
-        if (!symbolsDTO.hasSymbol(currency)) {
-            throw new BadRequestException("Currency " + currency + " is not accepted");
-        }
-
-        return currency;
-    }
 }

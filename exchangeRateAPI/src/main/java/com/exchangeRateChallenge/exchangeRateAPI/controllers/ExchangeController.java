@@ -7,16 +7,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRate;
 import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRates;
-import com.exchangeRateChallenge.exchangeRateAPI.services.ExchangeAPIService;
+import com.exchangeRateChallenge.exchangeRateAPI.services.ExchangeService;
 
 @RestController
 @RequestMapping("/api/v1/exchange")
 public class ExchangeController {
 
-    private final ExchangeAPIService exchangeAPIService;
+    private final ExchangeService exchangeService;
 
-    public ExchangeController(ExchangeAPIService exchangeAPIService) {
-        this.exchangeAPIService = exchangeAPIService;
+    public ExchangeController(ExchangeService exchangeService) {
+        this.exchangeService = exchangeService;
     }
     
     @GetMapping("/rate")
@@ -25,7 +25,7 @@ public class ExchangeController {
         @RequestParam(name = "to", required = true) String toCurrency
     ) {
 
-        ExchangeRate exchangeDetails = exchangeAPIService.getExchangeRateFromToCurrency(fromCurrency, toCurrency);
+        ExchangeRate exchangeDetails = exchangeService.getExchangeRateFromToCurrency(fromCurrency, toCurrency);
 
         return exchangeDetails;
     }
@@ -34,7 +34,7 @@ public class ExchangeController {
     public ExchangeRates getExchangeRates(
         @RequestParam(name = "from", required = true) String fromCurrency
     ) {
-        ExchangeRates exchangeDetails = exchangeAPIService.getExchangeRatesFromCurrency(fromCurrency);
+        ExchangeRates exchangeDetails = exchangeService.getExchangeRatesFromCurrency(fromCurrency);
 
         return exchangeDetails;
     }

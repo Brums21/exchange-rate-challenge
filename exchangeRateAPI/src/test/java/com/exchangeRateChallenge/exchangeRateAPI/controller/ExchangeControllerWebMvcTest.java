@@ -10,7 +10,7 @@ import com.exchangeRateChallenge.exchangeRateAPI.exceptions.BadRequestException;
 import com.exchangeRateChallenge.exchangeRateAPI.exceptions.ExchangeAPIException;
 import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRate;
 import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRates;
-import com.exchangeRateChallenge.exchangeRateAPI.services.ExchangeAPIService;
+import com.exchangeRateChallenge.exchangeRateAPI.services.ExchangeService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -33,7 +33,7 @@ public class ExchangeControllerWebMvcTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private ExchangeAPIService exchangeService;
+    private ExchangeService exchangeService;
 
     @Test
     public void givenGetExchangeRateFromAToB_whenValidParametersAreProvided_thenReturnExchangeRate() throws Exception {
