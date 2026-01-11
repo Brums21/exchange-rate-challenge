@@ -13,6 +13,9 @@ import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeAPIResponse
 
 import reactor.core.publisher.Mono;
 
+/**
+ * Service class to interact with the external exchange rate API.
+ */
 @Service
 public class ExchangeExternalAPIService {
     
@@ -29,7 +32,13 @@ public class ExchangeExternalAPIService {
             throw new IllegalStateException("Missing configuration: exchangeAPI (API key) is not set");
         }
     }
-    
+
+    /**
+     * Fetches all available exchange rates from the external API for a given source currency.
+     *
+     * @param fromCurrency The source currency code.
+     * @return An ExchangeAPIResponseDTO containing the exchange rates.
+     */
     public ExchangeAPIResponseDTO getExchangeRate(String fromCurrency) {
 
         LOGGER.info("Fetching exchange rate from {}", fromCurrency);
@@ -58,6 +67,11 @@ public class ExchangeExternalAPIService {
         return exchangeDetailsDTO;
     }
 
+    /**
+     * Fetches the list of accepted currency symbols from the external API.
+     *
+     * @return An ExchangeAPISymbolsDTO containing the accepted symbols.
+     */
     public ExchangeAPISymbolsDTO getAcceptedSymbols() {
         LOGGER.info("Fetching accepted symbols");
 

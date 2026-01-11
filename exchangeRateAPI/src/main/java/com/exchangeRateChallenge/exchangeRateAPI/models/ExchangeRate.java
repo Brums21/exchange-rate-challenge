@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/* Model class representing an exchange rate between two currencies */
 @Getter
 @Setter
 @AllArgsConstructor

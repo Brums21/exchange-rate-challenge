@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/* Class representing an error response structure */
 @Getter
 @Setter
 @AllArgsConstructor

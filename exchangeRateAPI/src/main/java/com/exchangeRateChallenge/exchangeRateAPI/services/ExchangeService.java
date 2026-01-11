@@ -11,6 +11,9 @@ import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRates;
 import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeAPISymbolsDTO;
 import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeAPIResponseDTO;
 
+/**
+ * Service class to handle exchange rate operations.
+ */
 @Service
 public class ExchangeService {
 
@@ -22,6 +25,14 @@ public class ExchangeService {
         this.exchangeExternalAPIService = exchangeExternalAPIService;
     }
 
+    /**
+     * Retrieves the exchange rate between two specified currencies.
+     *
+     * @param fromCurrency The currency code to convert from.
+     * @param toCurrency   The currency code to convert to.
+     * @return An ExchangeRate object containing the exchange rate details.
+     * @throws BadRequestException if either currency is not accepted or the exchange rate is not found.
+     */
     public ExchangeRate getExchangeRateFromToCurrency(String fromCurrency, String toCurrency) {
 
         ExchangeAPISymbolsDTO symbolsDTO = exchangeExternalAPIService.getAcceptedSymbols();
@@ -41,6 +52,13 @@ public class ExchangeService {
         return new ExchangeRate(fromCurrency, toCurrency, rate);
     }
 
+    /**
+     * Retrieves all exchange rates from a specified currency.
+     *
+     * @param fromCurrency The currency code to convert from.
+     * @return An ExchangeRates object containing all exchange rates from the specified currency.
+     * @throws BadRequestException if the fromCurrency is not accepted.
+     */
     public ExchangeRates getExchangeRatesFromCurrency(String fromCurrency) {
         
         ExchangeAPISymbolsDTO symbolsDTO = exchangeExternalAPIService.getAcceptedSymbols();
@@ -53,15 +71,14 @@ public class ExchangeService {
         return new ExchangeRates(fromCurrency, exchangeDetailsDTO.getRates());
     }
 
-    private static String cleanString(String currency) {
-        return currency.trim()
-            .replaceAll("^\"+", "")
-            .replaceAll("\"+$", "")
-            .replaceAll("\'+", "")
-            .replaceAll("\'+$", "")
-            .toUpperCase();
-    }
-
+    /**
+     * Cleans and validates a currency string against accepted symbols.
+     *
+     * @param currency   The currency string to clean and validate.
+     * @param symbolsDTO The DTO containing accepted currency symbols.
+     * @return The cleaned currency string.
+     * @throws BadRequestException if the currency is not accepted, meaning it's not present in the external API's list of accepted symbols.
+     */
     private static String cleanAndValidateCurrency(String currency, ExchangeAPISymbolsDTO symbolsDTO) {
         currency = cleanString(currency);
         if (!symbolsDTO.hasSymbol(currency)) {
@@ -69,6 +86,20 @@ public class ExchangeService {
         }
 
         return currency;
+    }
+
+    /**
+    * Auxiliary method to clean and validate currency strings.
+    * @param currency The currency string to clean and validate.
+    * @return The cleaned currency string, with no quotes or apostrophes, converted to upper case.
+    */
+    private static String cleanString(String currency) {
+        return currency.trim()
+            .replaceAll("^\"+", "")
+            .replaceAll("\"+$", "")
+            .replaceAll("\'+", "")
+            .replaceAll("\'+$", "")
+            .toUpperCase();
     }
 
 

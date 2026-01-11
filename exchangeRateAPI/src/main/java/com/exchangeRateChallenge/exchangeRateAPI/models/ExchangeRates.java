@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+/* Model class representing multiple exchange rates from a specific currency */
 @Getter
 @Setter
 @AllArgsConstructor

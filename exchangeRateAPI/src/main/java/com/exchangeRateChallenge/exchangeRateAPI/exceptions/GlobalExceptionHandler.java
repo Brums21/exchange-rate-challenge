@@ -7,9 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+/* Global exception handler for the Exchange Rate API */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     
+    /* Handles ExchangeAPIException and returns a structured error response */
     @ExceptionHandler(ExchangeAPIException.class)
     public ResponseEntity<ErrorResponse> handleExchangeAPIException(ExchangeAPIException ex) {
         return ResponseEntity
@@ -20,6 +22,7 @@ public class GlobalExceptionHandler {
         ));
     }
 
+    /* Handles BadRequestException and returns a structured error response */
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)

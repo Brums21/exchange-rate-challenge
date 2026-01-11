@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.Getter;
 import lombok.ToString;
 
+/* DTO for the exchange API response */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -22,6 +23,7 @@ public class ExchangeAPIResponseDTO {
     @JsonProperty("source")
     private String sourceCurrency;
 
+    /* Constructor that processes the rates map to remove the source currency prefix */
     public ExchangeAPIResponseDTO(Map<String, Double> rates, String sourceCurrency) {
         
         this.rates = rates.entrySet().stream()
