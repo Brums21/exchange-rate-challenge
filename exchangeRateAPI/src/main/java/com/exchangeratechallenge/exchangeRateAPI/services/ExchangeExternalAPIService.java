@@ -41,9 +41,9 @@ public class ExchangeExternalAPIService {
      */
     public ExchangeAPIResponseDTO getExchangeRate(String fromCurrency) {
 
-        LOGGER.info("Fetching exchange rate from {}", fromCurrency);
+        LOGGER.info("Fetching exchange rate from currency");
 
-        ExchangeAPIResponseDTO exchangeDetailsDTO = webClient.get()
+        return webClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/live")
                 .queryParam("access_key", apiKey.trim())
@@ -61,10 +61,9 @@ public class ExchangeExternalAPIService {
                 Mono.error(new ExchangeAPIException("Server error " + response.statusCode()))
             )
             .bodyToMono(ExchangeAPIResponseDTO.class)
-            .doOnSuccess(dto -> LOGGER.info("Received response: {}", dto))
+            .doOnSuccess(dto -> LOGGER.info("Received successful response from external API /live endpoint"))
             .block();
 
-        return exchangeDetailsDTO;
     }
 
     /**
@@ -75,7 +74,7 @@ public class ExchangeExternalAPIService {
     public ExchangeAPISymbolsDTO getAcceptedSymbols() {
         LOGGER.info("Fetching accepted symbols");
 
-        ExchangeAPISymbolsDTO symbolsDTO = webClient.get()
+        return webClient.get()
             .uri(uriBuilder -> uriBuilder
                 .path("/list")
                 .queryParam("access_key", apiKey.trim())
@@ -89,10 +88,8 @@ public class ExchangeExternalAPIService {
                 Mono.error(new ExchangeAPIException("Server error " + response.statusCode()))
             )
             .bodyToMono(ExchangeAPISymbolsDTO.class)
-            .doOnSuccess(dto -> LOGGER.info("Received symbols response: {}", dto))
+            .doOnSuccess(dto -> LOGGER.info("Received successful response from /symbols endpoint", dto))
             .block();
-
-        return symbolsDTO;
 
     }
     

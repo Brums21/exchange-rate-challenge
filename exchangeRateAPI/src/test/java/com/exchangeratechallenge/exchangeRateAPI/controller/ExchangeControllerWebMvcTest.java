@@ -4,10 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import com.exchangeratechallenge.exchangeRateAPI.controllers.ExchangeController;
 import com.exchangeratechallenge.exchangeRateAPI.exceptions.BadRequestException;
@@ -15,6 +11,11 @@ import com.exchangeratechallenge.exchangeRateAPI.exceptions.ExchangeAPIException
 import com.exchangeratechallenge.exchangeRateAPI.models.ExchangeRate;
 import com.exchangeratechallenge.exchangeRateAPI.models.ExchangeRates;
 import com.exchangeratechallenge.exchangeRateAPI.services.ExchangeService;
+
+import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

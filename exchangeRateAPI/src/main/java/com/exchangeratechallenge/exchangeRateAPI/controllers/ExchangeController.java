@@ -34,10 +34,7 @@ public class ExchangeController {
         @RequestParam(name = "from", required = true) String fromCurrency,
         @RequestParam(name = "to", required = true) String toCurrency
     ) {
-
-        ExchangeRate exchangeDetails = exchangeService.getExchangeRateFromToCurrency(fromCurrency, toCurrency);
-
-        return exchangeDetails;
+        return exchangeService.getExchangeRateFromToCurrency(fromCurrency, toCurrency);
     }
 
     /**
@@ -50,8 +47,6 @@ public class ExchangeController {
     public ExchangeRates getExchangeRates(
         @RequestParam(name = "from", required = true) String fromCurrency
     ) {
-        ExchangeRates exchangeDetails = exchangeService.getExchangeRatesFromCurrency(fromCurrency);
-
-        return exchangeDetails;
+        return exchangeService.getExchangeRatesFromCurrency(fromCurrency);
     }
 }

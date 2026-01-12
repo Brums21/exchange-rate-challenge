@@ -40,7 +40,7 @@ public class ExchangeService {
         fromCurrency = cleanAndValidateCurrency(fromCurrency, symbolsDTO);
         toCurrency = cleanAndValidateCurrency(toCurrency, symbolsDTO);
 
-        LOGGER.info("Fetching exchange rate from {} to {}", fromCurrency, toCurrency);
+        LOGGER.info("Fetching exchange rate between two currencies.");
 
         ExchangeAPIResponseDTO exchangeDetailsDTO = exchangeExternalAPIService.getExchangeRate(fromCurrency);
         Double rate = exchangeDetailsDTO.getRates().get(toCurrency);
@@ -65,7 +65,7 @@ public class ExchangeService {
 
         fromCurrency = cleanAndValidateCurrency(fromCurrency, symbolsDTO);
 
-        LOGGER.info("Fetching exchange rates from {}", fromCurrency);
+        LOGGER.info("Fetching all exchange rates from currency");
         ExchangeAPIResponseDTO exchangeDetailsDTO = exchangeExternalAPIService.getExchangeRate(fromCurrency);
 
         return new ExchangeRates(fromCurrency, exchangeDetailsDTO.getRates());
