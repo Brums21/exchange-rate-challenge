@@ -112,6 +112,4 @@ public class ExchangeControllerWebMvcTest {
                 .andExpect(jsonPath("$.fromCurrency").value(fromCurrency));
     }
 
-
-
 }

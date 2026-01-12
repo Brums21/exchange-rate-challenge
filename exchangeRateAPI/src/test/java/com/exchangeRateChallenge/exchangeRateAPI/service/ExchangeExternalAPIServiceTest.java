@@ -77,7 +77,7 @@ public class ExchangeExternalAPIServiceTest {
         var exchangeDetails = exchangeExternalAPIService.getExchangeRate(fromCurrency);
 
         assertTrue(exchangeDetails.getSourceCurrency().equals("USD"));
-        assertTrue(exchangeDetails.getRates().get("USDEUR").equals(0.85));
+        assertTrue(exchangeDetails.getRates().get("EUR").equals(0.85));
     }
 
     @Test
