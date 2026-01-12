@@ -1,8 +1,9 @@
-package com.exchangeRateChallenge.exchangeRateAPI.service;
+package com.exchangeratechallenge.exchangeRateAPI.service;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.AfterAll;
@@ -11,19 +12,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.exchangeRateChallenge.exchangeRateAPI.exceptions.ExchangeAPIException;
-import com.exchangeRateChallenge.exchangeRateAPI.services.ExchangeExternalAPIService;
+import com.exchangeratechallenge.exchangeRateAPI.exceptions.ExchangeAPIException;
+import com.exchangeratechallenge.exchangeRateAPI.services.ExchangeExternalAPIService;
 
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
-public class ExchangeExternalAPIServiceTest {
+class ExchangeExternalAPIServiceTest {
     
     private ExchangeExternalAPIService exchangeExternalAPIService;
 
     private static MockWebServer mockWebServer;
 
-    private static final String successBody = 
+    private static final String SUCCESS_BODY = 
         "{\"success\": true,"
         + "\"terms\": \"https://exchangerate.host/terms\","
         + "\"privacy\": \"https://exchangerate.host/privacy\","
@@ -35,7 +36,7 @@ public class ExchangeExternalAPIServiceTest {
         + "\"USDEUR\": 0.85"
         + "}}";
 
-    private static final String symbolsBody = 
+    private static final String SYMBOLS_BODY = 
         "{\"success\": true,"
         + "\"terms\": \"https://exchangerate.host/terms\","
         + "\"privacy\": \"https://exchangerate.host/privacy\","
@@ -68,20 +69,20 @@ public class ExchangeExternalAPIServiceTest {
     }
 
     @Test
-    public void givenGetExchangeRate_whenValidInput_thenReturnExchangeRate() {
+    void givenGetExchangeRate_whenValidInput_thenReturnExchangeRate() {
         
         String fromCurrency = "USD";
 
-        mockWebServer.enqueue(jsonResponse(200, successBody));
+        mockWebServer.enqueue(jsonResponse(200, SUCCESS_BODY));
 
         var exchangeDetails = exchangeExternalAPIService.getExchangeRate(fromCurrency);
 
-        assertTrue(exchangeDetails.getSourceCurrency().equals("USD"));
-        assertTrue(exchangeDetails.getRates().get("EUR").equals(0.85));
+        assertEquals(exchangeDetails.getSourceCurrency(), "USD");
+        assertEquals(exchangeDetails.getRates().get("EUR"), 0.85);
     }
 
     @Test
-    public void givenGetExchangeRate_whenInvalidApiKeyProvided_thenThrowExchangeAPIException() {
+    void givenGetExchangeRate_whenInvalidApiKeyProvided_thenThrowExchangeAPIException() {
         
         String fromCurrency = "USD";
 
@@ -100,11 +101,11 @@ public class ExchangeExternalAPIServiceTest {
             () -> exchangeExternalAPIService.getExchangeRate(fromCurrency)
         );
 
-        assertTrue(ex.getMessage().equals("The provided API key was not provided or is invalid."));
+        assertEquals(ex.getMessage(), "The provided API key was not provided or is invalid.");
     }
 
     @Test
-    public void givenGetExchangeRate_whenServerErrorOccurs_thenThrowExchangeAPIException() {
+    void givenGetExchangeRate_whenServerErrorOccurs_thenThrowExchangeAPIException() {
         
         String fromCurrency = "USD";
 
@@ -115,12 +116,12 @@ public class ExchangeExternalAPIServiceTest {
             () -> exchangeExternalAPIService.getExchangeRate(fromCurrency)
         );
 
-        assertTrue(ex.getMessage().equals("Server error 502 BAD_GATEWAY"));
+        assertEquals(ex.getMessage(), "Server error 502 BAD_GATEWAY");
 
     }
     
     @Test
-    public void givenGetExchangeRate_whenClientErrorOccurs_thenThrowExchangeAPIException() {
+    void givenGetExchangeRate_whenClientErrorOccurs_thenThrowExchangeAPIException() {
         
         String fromCurrency = "USD";
         mockWebServer.enqueue(jsonResponse(404, ""));
@@ -130,12 +131,12 @@ public class ExchangeExternalAPIServiceTest {
             () -> exchangeExternalAPIService.getExchangeRate(fromCurrency)
         );
 
-        assertTrue(ex.getMessage().equals("Client error 404 NOT_FOUND"));
+        assertEquals(ex.getMessage(), "Client error 404 NOT_FOUND");
 
     }
     
     @Test
-    public void givenExchangeExternalAPIServiceConstructor_whenApiKeyIsMissing_thenThrowIllegalStateException() {
+    void givenExchangeExternalAPIServiceConstructor_whenApiKeyIsMissing_thenThrowIllegalStateException() {
         
         WebClient webClient = WebClient.builder()
             .baseUrl(mockWebServer.url("/").toString())
@@ -153,15 +154,15 @@ public class ExchangeExternalAPIServiceTest {
 
         String missingAPIMessage = "Missing configuration: exchangeAPI (API key) is not set";
 
-        assertTrue(exceptionKeyEmpty.getMessage().equals(missingAPIMessage));
-        assertTrue(exceptionKeyNull.getMessage().equals(missingAPIMessage));
+        assertEquals(exceptionKeyEmpty.getMessage(), missingAPIMessage);
+        assertEquals(exceptionKeyNull.getMessage(), missingAPIMessage);
 
     }
     
     @Test
-    public void givenGetListCurrencies_whenValidInput_thenReturnAcceptedSymbols() {
+    void givenGetListCurrencies_whenValidInput_thenReturnAcceptedSymbols() {
         
-        mockWebServer.enqueue(jsonResponse(200, symbolsBody));
+        mockWebServer.enqueue(jsonResponse(200, SYMBOLS_BODY));
 
         var symbolsDTO = exchangeExternalAPIService.getAcceptedSymbols();
 
@@ -171,7 +172,7 @@ public class ExchangeExternalAPIServiceTest {
     }
 
     @Test
-    public void givenGetListCurrencies_whenInvalidApiKeyProvided_thenThrowExchangeAPIException() {
+    void givenGetListCurrencies_whenInvalidApiKeyProvided_thenThrowExchangeAPIException() {
 
         mockWebServer.enqueue(jsonResponse(
             401,
@@ -188,11 +189,11 @@ public class ExchangeExternalAPIServiceTest {
             () -> exchangeExternalAPIService.getAcceptedSymbols()
         );
 
-        assertTrue(ex.getMessage().equals("The provided API key was not provided or is invalid."));
+        assertEquals(ex.getMessage(), "The provided API key was not provided or is invalid.");
     }
 
     @Test
-    public void givenGetListCurrencies_whenServerErrorOccurs_thenThrowExchangeAPIException() {
+    void givenGetListCurrencies_whenServerErrorOccurs_thenThrowExchangeAPIException() {
 
         mockWebServer.enqueue(jsonResponse(502, ""));
 
@@ -201,7 +202,7 @@ public class ExchangeExternalAPIServiceTest {
             () -> exchangeExternalAPIService.getAcceptedSymbols()
         );
 
-        assertTrue(ex.getMessage().equals("Server error 502 BAD_GATEWAY"));
+        assertEquals(ex.getMessage(), "Server error 502 BAD_GATEWAY");
 
     }
 

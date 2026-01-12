@@ -1,13 +1,13 @@
-package com.exchangeRateChallenge.exchangeRateAPI.controllers;
+package com.exchangeratechallenge.exchangeRateAPI.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRate;
-import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRates;
-import com.exchangeRateChallenge.exchangeRateAPI.services.ExchangeService;
+import com.exchangeratechallenge.exchangeRateAPI.models.ExchangeRate;
+import com.exchangeratechallenge.exchangeRateAPI.models.ExchangeRates;
+import com.exchangeratechallenge.exchangeRateAPI.services.ExchangeService;
 
 /**
  * Controller class to handle exchange rate related endpoints.

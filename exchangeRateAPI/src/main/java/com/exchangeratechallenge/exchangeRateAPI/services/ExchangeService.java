@@ -1,15 +1,15 @@
-package com.exchangeRateChallenge.exchangeRateAPI.services;
+package com.exchangeratechallenge.exchangeRateAPI.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Service;
 
-import com.exchangeRateChallenge.exchangeRateAPI.exceptions.BadRequestException;
-import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRate;
-import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRates;
-import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeAPISymbolsDTO;
-import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeAPIResponseDTO;
+import com.exchangeratechallenge.exchangeRateAPI.exceptions.BadRequestException;
+import com.exchangeratechallenge.exchangeRateAPI.models.ExchangeRate;
+import com.exchangeratechallenge.exchangeRateAPI.models.ExchangeRates;
+import com.exchangeratechallenge.exchangeRateAPI.models.DTOs.ExchangeAPIResponseDTO;
+import com.exchangeratechallenge.exchangeRateAPI.models.DTOs.ExchangeAPISymbolsDTO;
 
 /**
  * Service class to handle exchange rate operations.

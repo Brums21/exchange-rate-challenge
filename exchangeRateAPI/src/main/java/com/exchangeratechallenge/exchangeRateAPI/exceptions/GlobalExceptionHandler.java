@@ -1,4 +1,4 @@
-package com.exchangeRateChallenge.exchangeRateAPI.exceptions;
+package com.exchangeratechallenge.exchangeRateAPI.exceptions;
 
 import java.time.Instant;
 

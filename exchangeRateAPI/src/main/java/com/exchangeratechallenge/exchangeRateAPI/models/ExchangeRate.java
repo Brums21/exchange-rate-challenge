@@ -1,6 +1,4 @@
-package com.exchangeRateChallenge.exchangeRateAPI.models;
-
-import java.util.Map;
+package com.exchangeratechallenge.exchangeRateAPI.models;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -8,14 +6,15 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-/* Model class representing multiple exchange rates from a specific currency */
+/* Model class representing an exchange rate between two currencies */
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
-public class ExchangeRates {
+public class ExchangeRate {
     
     private String fromCurrency;
-    private Map<String, Double> rates;
+    private String toCurrency;
+    private Double rate;
 }

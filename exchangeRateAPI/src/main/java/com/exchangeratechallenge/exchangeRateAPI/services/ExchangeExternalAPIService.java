@@ -1,4 +1,4 @@
-package com.exchangeRateChallenge.exchangeRateAPI.services;
+package com.exchangeratechallenge.exchangeRateAPI.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,9 +7,9 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.exchangeRateChallenge.exchangeRateAPI.exceptions.ExchangeAPIException;
-import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeAPISymbolsDTO;
-import com.exchangeRateChallenge.exchangeRateAPI.models.DTOs.ExchangeAPIResponseDTO;
+import com.exchangeratechallenge.exchangeRateAPI.exceptions.ExchangeAPIException;
+import com.exchangeratechallenge.exchangeRateAPI.models.DTOs.ExchangeAPIResponseDTO;
+import com.exchangeratechallenge.exchangeRateAPI.models.DTOs.ExchangeAPISymbolsDTO;
 
 import reactor.core.publisher.Mono;
 

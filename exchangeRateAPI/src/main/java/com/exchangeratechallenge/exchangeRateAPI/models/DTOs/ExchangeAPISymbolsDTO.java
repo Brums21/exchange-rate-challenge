@@ -1,4 +1,4 @@
-package com.exchangeRateChallenge.exchangeRateAPI.models.DTOs;
+package com.exchangeratechallenge.exchangeRateAPI.models.DTOs;
 
 import java.util.Map;
 

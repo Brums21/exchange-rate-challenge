@@ -1,4 +1,4 @@
-package com.exchangeRateChallenge.exchangeRateAPI.controller;
+package com.exchangeratechallenge.exchangeRateAPI.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.exchangeRateChallenge.exchangeRateAPI.controllers.ExchangeController;
-import com.exchangeRateChallenge.exchangeRateAPI.exceptions.BadRequestException;
-import com.exchangeRateChallenge.exchangeRateAPI.exceptions.ExchangeAPIException;
-import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRate;
-import com.exchangeRateChallenge.exchangeRateAPI.models.ExchangeRates;
-import com.exchangeRateChallenge.exchangeRateAPI.services.ExchangeService;
+import com.exchangeratechallenge.exchangeRateAPI.controllers.ExchangeController;
+import com.exchangeratechallenge.exchangeRateAPI.exceptions.BadRequestException;
+import com.exchangeratechallenge.exchangeRateAPI.exceptions.ExchangeAPIException;
+import com.exchangeratechallenge.exchangeRateAPI.models.ExchangeRate;
+import com.exchangeratechallenge.exchangeRateAPI.models.ExchangeRates;
+import com.exchangeratechallenge.exchangeRateAPI.services.ExchangeService;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -34,7 +34,7 @@ public class ExchangeControllerWebMvcTest {
     private ExchangeService exchangeService;
 
     @Test
-    public void givenGetExchangeRateFromAToB_whenValidParametersAreProvided_thenReturnExchangeRate() throws Exception {
+    void givenGetExchangeRateFromAToB_whenValidParametersAreProvided_thenReturnExchangeRate() throws Exception {
 
         String fromCurrency = "USD";
         String toCurrency = "EUR";
@@ -54,7 +54,7 @@ public class ExchangeControllerWebMvcTest {
     }
 
     @Test
-    public void givenGetExchangeRateFromAToB_whenMissingParametersAreProvided_thenReturnBadRequest() throws Exception {
+    void givenGetExchangeRateFromAToB_whenMissingParametersAreProvided_thenReturnBadRequest() throws Exception {
         mockMvc.perform(get(RATE_URL)
                 .param("from", "USD"))
                 .andExpect(status().isBadRequest());
@@ -65,7 +65,7 @@ public class ExchangeControllerWebMvcTest {
     }
 
     @Test
-    public void givenGetExchangeRateFromAToB_whenFromCurrecyIsInvalid_thenReturnBadRequest() throws Exception {
+    void givenGetExchangeRateFromAToB_whenFromCurrecyIsInvalid_thenReturnBadRequest() throws Exception {
         String fromCurrency = "INVALID";
         String toCurrency = "EUR";
 
@@ -79,7 +79,7 @@ public class ExchangeControllerWebMvcTest {
     }
 
     @Test
-    public void givenGetExchangeRateFromAToB_whenExchangeAPIReturnsServerError_thenReturnInternalServerError() throws Exception {
+    void givenGetExchangeRateFromAToB_whenExchangeAPIReturnsServerError_thenReturnInternalServerError() throws Exception {
         
         String fromCurrency = "USD";
         String toCurrency = "EUR";
@@ -94,7 +94,7 @@ public class ExchangeControllerWebMvcTest {
     }
 
     @Test
-    public void givenGetExchangeRateFromA_whenValidParametersAreProvided_thenReturnExchangeRate() throws Exception {
+    void givenGetExchangeRateFromA_whenValidParametersAreProvided_thenReturnExchangeRate() throws Exception {
 
         String fromCurrency = "USD";
         Map<String, Double> rates = new HashMap<>();

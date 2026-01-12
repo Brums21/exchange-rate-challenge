@@ -1,4 +1,4 @@
-package com.exchangeRateChallenge.exchangeRateAPI.integration;
+package com.exchangeratechallenge.exchangeRateAPI.integration;
 
 import static org.hamcrest.Matchers.is;
 
@@ -20,7 +20,7 @@ import io.restassured.RestAssured;
         "exchange-url=http://localhost:8081"
     }
 )
-public class ExchangeControllerITTest {
+class ExchangeControllerITTest {
 
     private WireMockServer wireMockServer;
 
@@ -50,7 +50,7 @@ public class ExchangeControllerITTest {
         + "\"AFN\": \"Afghan Afghani\""
         + "}}";
 
-   @LocalServerPort
+    @LocalServerPort
     private int port;
 
     @BeforeEach
@@ -66,7 +66,7 @@ public class ExchangeControllerITTest {
     }
 
     @Test
-    public void givenGetExchangeRate_whenValidBaseAndTargetCurrency_ReturnCorrectRate() {
+    void givenGetExchangeRate_whenValidBaseAndTargetCurrency_ReturnCorrectRate() {
 
         String baseCurrency = "USD";
         String targetCurrency = "EUR";
@@ -85,7 +85,7 @@ public class ExchangeControllerITTest {
     }
 
     @Test
-    public void givenGetExchangeRate_whenInvalidBaseOrTargetCurrency_ReturnBadRequest() {
+    void givenGetExchangeRate_whenInvalidBaseOrTargetCurrency_ReturnBadRequest() {
 
         String baseCurrency = "INVALID";
         String targetCurrency = "BASE";
@@ -110,7 +110,7 @@ public class ExchangeControllerITTest {
     }
 
     @Test
-    public void givenGetExchangeRate_whenExchangeAPIReturnsServerError_ReturnInternalServerError() {
+    void givenGetExchangeRate_whenExchangeAPIReturnsServerError_ReturnInternalServerError() {
 
         String baseCurrency = "USD";
         String targetCurrency = "EUR";
@@ -124,7 +124,7 @@ public class ExchangeControllerITTest {
     }
 
     @Test
-    public void givenGetExchangeRate_whenMissingParameter_ReturnBadRequest() {
+    void givenGetExchangeRate_whenMissingParameter_ReturnBadRequest() {
 
         RestAssured.when()
             .get(String.format(RATE_URL+"?from=USD", port))
@@ -140,7 +140,7 @@ public class ExchangeControllerITTest {
     }
 
     @Test
-    public void givenGetExchangeRates_whenValidBaseCurrency_ReturnCorrectRates() {
+    void givenGetExchangeRates_whenValidBaseCurrency_ReturnCorrectRates() {
 
         String baseCurrency = "USD";
 
@@ -158,7 +158,7 @@ public class ExchangeControllerITTest {
     }
 
     @Test
-    public void givenGetExchangeRates_whenExchangeAPIReturnsServerError_ReturnInternalServerError() {
+    void givenGetExchangeRates_whenExchangeAPIReturnsServerError_ReturnInternalServerError() {
 
         String baseCurrency = "USD";
 
@@ -172,7 +172,7 @@ public class ExchangeControllerITTest {
     }
 
     @Test
-    public void givenGetExchangeRates_whenMissingParameter_ReturnBadRequest() {
+    void givenGetExchangeRates_whenMissingParameter_ReturnBadRequest() {
 
         RestAssured.when()
             .get(String.format(RATES_URL, port))

@@ -1,4 +1,4 @@
-package com.exchangeRateChallenge.exchangeRateAPI;
+package com.exchangeratechallenge.exchangeRateAPI;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
