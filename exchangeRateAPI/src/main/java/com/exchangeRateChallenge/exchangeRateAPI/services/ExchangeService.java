@@ -95,10 +95,8 @@ public class ExchangeService {
     */
     private static String cleanString(String currency) {
         return currency.trim()
-            .replaceAll("^\"+", "")
-            .replaceAll("\"+$", "")
-            .replaceAll("\'+", "")
-            .replaceAll("\'+$", "")
+            .replace("\"", "")
+            .replace("'","")
             .toUpperCase();
     }
 
