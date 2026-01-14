@@ -5,6 +5,9 @@ import java.time.Instant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import jakarta.validation.ConstraintViolationException;
+
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 /* Global exception handler for the Exchange Rate API */
@@ -27,6 +30,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse(ex.getMessage(), Instant.now().toString()));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(new ErrorResponse(ex.getConstraintViolations()
+                    .iterator()
+                    .next()
+                    .getMessage(), 
+                Instant.now().toString())
+            );
     }
 
 }

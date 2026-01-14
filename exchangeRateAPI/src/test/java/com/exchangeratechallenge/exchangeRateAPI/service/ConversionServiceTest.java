@@ -7,19 +7,18 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.convert.ConversionService;
 
 import com.exchangeratechallenge.exchangeRateAPI.exceptions.BadRequestException;
 import com.exchangeratechallenge.exchangeRateAPI.models.Conversion;
 import com.exchangeratechallenge.exchangeRateAPI.models.DTOs.ExchangeAPIResponseDTO;
 import com.exchangeratechallenge.exchangeRateAPI.models.DTOs.ExchangeAPISymbolsDTO;
+import com.exchangeratechallenge.exchangeRateAPI.services.ConversionService;
 import com.exchangeratechallenge.exchangeRateAPI.services.ExchangeExternalAPIService;
-import com.exchangeratechallenge.exchangeRateAPI.services.ExchangeService;
 
 @ExtendWith(MockitoExtension.class)
 public class ConversionServiceTest {
@@ -36,6 +35,7 @@ public class ConversionServiceTest {
         symbolsMap.put("USD", "United States Dollar");
         symbolsMap.put("EUR", "Euro");
         symbolsMap.put("GBP", "British Pound Sterling");
+        symbolsMap.put("AED", "United Arab Emirates Dirham");
         symbolsDTO.setSymbols(symbolsMap);
         return symbolsDTO;
     }
@@ -63,8 +63,8 @@ public class ConversionServiceTest {
 
         Conversion conversion = conversionService.getConversionValues(fromCurrency, toCurrency, value);
 
-        assertEquals(8.5, conversion.getConverterCurrencies().get("EUR"));
-        assertEquals(36.72982, conversion.getConverterCurrencies().get("GBP"));
+        assertEquals(8.5, conversion.getConverterCurrencies().get("EUR"), 0.001);
+        assertEquals(36.72982, conversion.getConverterCurrencies().get("GBP"), 0.001);
     }
 
     @Test
@@ -85,7 +85,7 @@ public class ConversionServiceTest {
             () -> conversionService.getConversionValues(fromCurrency, toCurrency, value)
         );
 
-        assertEquals("Conversion not found for currency INVALID", ex.getMessage());
+        assertEquals("Currency INVALID is not accepted", ex.getMessage());
     }
 
     @Test
@@ -104,7 +104,29 @@ public class ConversionServiceTest {
             () -> conversionService.getConversionValues(fromCurrency, toCurrency, value)
         );
 
-        assertEquals("Conversion not found from currency INVALID", ex.getMessage());
+        assertEquals("Currency INVALID is not accepted", ex.getMessage());
+    }
+
+    @Test
+    void givenGetConversionValues_whenRateIsNotAvailable_thenThrowException(){
+
+        String fromCurrency = "USD";
+        String toCurrency = "EUR,AED";
+        Double value = 10.0;
+
+        ExchangeAPISymbolsDTO symbolsDTO = createSymbolsDTO();
+        ExchangeAPIResponseDTO exchangeAPIResponseDTO = createExchangeAPIResponseDTO();
+
+        when(exchangeExternalAPIService.getAcceptedSymbols()).thenReturn(symbolsDTO);
+        when(exchangeExternalAPIService.getExchangeRate(fromCurrency)).thenReturn(exchangeAPIResponseDTO);
+
+        BadRequestException ex = assertThrows(
+            BadRequestException.class, 
+            () -> conversionService.getConversionValues(fromCurrency, toCurrency, value)
+        );
+
+        assertEquals("Exchange rate not found from currency " + fromCurrency + " to currency AED", ex.getMessage());
+
     }
 
 }

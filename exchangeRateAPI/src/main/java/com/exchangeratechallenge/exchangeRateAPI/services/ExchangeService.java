@@ -10,6 +10,7 @@ import com.exchangeratechallenge.exchangeRateAPI.models.ExchangeRate;
 import com.exchangeratechallenge.exchangeRateAPI.models.ExchangeRates;
 import com.exchangeratechallenge.exchangeRateAPI.models.DTOs.ExchangeAPIResponseDTO;
 import com.exchangeratechallenge.exchangeRateAPI.models.DTOs.ExchangeAPISymbolsDTO;
+import com.exchangeratechallenge.exchangeRateAPI.utils.ParameterCleaner;
 
 /**
  * Service class to handle exchange rate operations.
@@ -37,8 +38,8 @@ public class ExchangeService {
 
         ExchangeAPISymbolsDTO symbolsDTO = exchangeExternalAPIService.getAcceptedSymbols();
 
-        fromCurrency = cleanAndValidateCurrency(fromCurrency, symbolsDTO);
-        toCurrency = cleanAndValidateCurrency(toCurrency, symbolsDTO);
+        fromCurrency = ParameterCleaner.cleanAndValidateCurrency(fromCurrency, symbolsDTO);
+        toCurrency = ParameterCleaner.cleanAndValidateCurrency(toCurrency, symbolsDTO);
 
         LOGGER.info("Fetching exchange rate between two currencies.");
 
@@ -63,42 +64,12 @@ public class ExchangeService {
         
         ExchangeAPISymbolsDTO symbolsDTO = exchangeExternalAPIService.getAcceptedSymbols();
 
-        fromCurrency = cleanAndValidateCurrency(fromCurrency, symbolsDTO);
+        fromCurrency = ParameterCleaner.cleanAndValidateCurrency(fromCurrency, symbolsDTO);
 
         LOGGER.info("Fetching all exchange rates from currency");
         ExchangeAPIResponseDTO exchangeDetailsDTO = exchangeExternalAPIService.getExchangeRate(fromCurrency);
 
         return new ExchangeRates(fromCurrency, exchangeDetailsDTO.getRates());
     }
-
-    /**
-     * Cleans and validates a currency string against accepted symbols.
-     *
-     * @param currency   The currency string to clean and validate.
-     * @param symbolsDTO The DTO containing accepted currency symbols.
-     * @return The cleaned currency string.
-     * @throws BadRequestException if the currency is not accepted, meaning it's not present in the external API's list of accepted symbols.
-     */
-    private static String cleanAndValidateCurrency(String currency, ExchangeAPISymbolsDTO symbolsDTO) {
-        currency = cleanString(currency);
-        if (!symbolsDTO.hasSymbol(currency)) {
-            throw new BadRequestException("Currency " + currency + " is not accepted");
-        }
-
-        return currency;
-    }
-
-    /**
-    * Auxiliary method to clean and validate currency strings.
-    * @param currency The currency string to clean and validate.
-    * @return The cleaned currency string, with no quotes or apostrophes, converted to upper case.
-    */
-    private static String cleanString(String currency) {
-        return currency.trim()
-            .replace("\"", "")
-            .replace("'","")
-            .toUpperCase();
-    }
-
 
 }

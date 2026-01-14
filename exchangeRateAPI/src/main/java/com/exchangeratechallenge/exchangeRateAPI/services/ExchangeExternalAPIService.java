@@ -38,6 +38,7 @@ public class ExchangeExternalAPIService {
      *
      * @param fromCurrency The source currency code.
      * @return An ExchangeAPIResponseDTO containing the exchange rates.
+     * @throws InterruptedException 
      */
     public ExchangeAPIResponseDTO getExchangeRate(String fromCurrency) {
 

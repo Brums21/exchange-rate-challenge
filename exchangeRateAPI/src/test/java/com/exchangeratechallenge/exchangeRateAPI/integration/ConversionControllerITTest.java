@@ -82,10 +82,10 @@ public class ConversionControllerITTest {
             .get(String.format(CONVERSION_URL, port))
             .then()
             .statusCode(200)
-            .body("from", is("USD"))
-            .body("originalValue", is(10.0))
-            .body("conversion.EUR", is(8.5f))
-            .body("conversion.AFN", is(578.936f));
+            .body("fromCurrency", is("USD"))
+            .body("originalValue", is(10.0f))
+            .body("converterCurrencies.EUR", is(8.5f))
+            .body("converterCurrencies.AFN", is(578.936f));
     }
 
     @Test

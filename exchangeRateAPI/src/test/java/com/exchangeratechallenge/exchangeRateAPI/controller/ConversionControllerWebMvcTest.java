@@ -7,9 +7,11 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.exchangeratechallenge.exchangeRateAPI.controllers.ConversionController;
 import com.exchangeratechallenge.exchangeRateAPI.exceptions.BadRequestException;
 import com.exchangeratechallenge.exchangeRateAPI.exceptions.ExchangeAPIException;
 import com.exchangeratechallenge.exchangeRateAPI.models.Conversion;
+import com.exchangeratechallenge.exchangeRateAPI.services.ConversionService;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -45,17 +47,17 @@ public class ConversionControllerWebMvcTest {
             "JPY", 11000.0
         ));
 
-        when(conversionService.getConversionValues(fromCurrency, toCurrency, value)).thenReturn(mockedConversion);
+        when(conversionService.getConversionValues(fromCurrency, toCurrency, 100.0)).thenReturn(mockedConversion);
 
         mockMvc.perform(get(CONVERSION_URL)
                 .param("from", fromCurrency)
                 .param("to", toCurrency)
                 .param("value", value))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.from").value(fromCurrency))
-                .andExpect(jsonPath("$.conversion.EUR").value(85.0))
-                .andExpect(jsonPath("$.conversion.GBP").value(75.0))
-                .andExpect(jsonPath("$.conversion.JPY").value(11000.0));
+                .andExpect(jsonPath("$.fromCurrency").value(fromCurrency))
+                .andExpect(jsonPath("$.converterCurrencies.EUR").value(85.0))
+                .andExpect(jsonPath("$.converterCurrencies.GBP").value(75.0))
+                .andExpect(jsonPath("$.converterCurrencies.JPY").value(11000.0));
     }
 
     @Test
@@ -82,7 +84,7 @@ public class ConversionControllerWebMvcTest {
         String toCurrency = "EUR";
         String value = "100";
 
-        when(conversionService.getConversionValues(fromCurrency, toCurrency, value))
+        when(conversionService.getConversionValues(fromCurrency, toCurrency, 100.0))
             .thenThrow(new BadRequestException("Conversion not found from currency INVALID"));
 
         mockMvc.perform(get(CONVERSION_URL)
@@ -99,7 +101,7 @@ public class ConversionControllerWebMvcTest {
         String toCurrency = "EUR";
         String value = "100";
 
-        when(conversionService.getConversionValues(fromCurrency, toCurrency, value))
+        when(conversionService.getConversionValues(fromCurrency, toCurrency, 100.0))
             .thenThrow(new ExchangeAPIException("Server error: 502 BAD_GATEWAY"));
 
         mockMvc.perform(get(CONVERSION_URL)
@@ -115,7 +117,7 @@ public class ConversionControllerWebMvcTest {
         String toCurrency = "EUR,INVALID";
         String value = "100";
 
-        when(conversionService.getConversionValues(fromCurrency, toCurrency, value))
+        when(conversionService.getConversionValues(fromCurrency, toCurrency, 100.0))
             .thenThrow(new BadRequestException("Conversion not found for currency INVALID"));
 
         mockMvc.perform(get(CONVERSION_URL)
@@ -131,9 +133,6 @@ public class ConversionControllerWebMvcTest {
         String toCurrency = "EUR";
         String value = "INVALID";
 
-        when(conversionService.getConversionValues(fromCurrency, toCurrency, value))
-            .thenThrow(new BadRequestException("Invalid value for conversion: " + value));
-
         mockMvc.perform(get(CONVERSION_URL)
                 .param("from", fromCurrency)
                 .param("to", toCurrency)
@@ -145,15 +144,12 @@ public class ConversionControllerWebMvcTest {
     void givenGetConversions_whenValueIsNegative_thenReturnBadRequest() throws Exception {
         String fromCurrency = "USD";
         String toCurrency = "EUR";
-        String value = "-100";
-
-        when(conversionService.getConversionValues(fromCurrency, toCurrency, value))
-            .thenThrow(new BadRequestException("Conversion value must be positive: " + value));
+        Double value = -100.0;
 
         mockMvc.perform(get(CONVERSION_URL)
                 .param("from", fromCurrency)
                 .param("to", toCurrency)
-                .param("value", value))
+                .param("value", value.toString()))
                 .andExpect(status().isBadRequest());
     }
 
