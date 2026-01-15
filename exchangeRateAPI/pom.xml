@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.exchangeratechallenge</groupId>
-	<artifactId>exchangeRateAPI</artifactId>
+	<artifactId>exchangerateapi</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>exchangeRateAPI</name>
+	<name>exchangerateapi</name>
 	<description>Exchange Rate Challenge</description>
 	<url/>
 	<licenses>
@@ -44,6 +44,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency> -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+			<version>4.0.1</version>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.wiremock</groupId>
 			<artifactId>wiremock-standalone</artifactId>
