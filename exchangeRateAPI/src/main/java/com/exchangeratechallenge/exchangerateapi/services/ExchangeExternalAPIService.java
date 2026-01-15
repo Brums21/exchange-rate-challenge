@@ -89,7 +89,7 @@ public class ExchangeExternalAPIService {
                 Mono.error(new ExchangeAPIException("Server error " + response.statusCode()))
             )
             .bodyToMono(ExchangeAPISymbolsDTO.class)
-            .doOnSuccess(dto -> LOGGER.info("Received successful response from /symbols endpoint", dto))
+            .doOnSuccess(dto -> LOGGER.info("Received successful response from /symbols endpoint"))
             .block();
 
     }

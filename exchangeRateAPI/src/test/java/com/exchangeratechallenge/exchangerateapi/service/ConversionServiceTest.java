@@ -21,7 +21,7 @@ import com.exchangeratechallenge.exchangerateapi.services.ConversionService;
 import com.exchangeratechallenge.exchangerateapi.services.ExchangeExternalAPIService;
 
 @ExtendWith(MockitoExtension.class)
-public class ConversionServiceTest {
+class ConversionServiceTest {
     
     @Mock
     private ExchangeExternalAPIService exchangeExternalAPIService;

@@ -21,7 +21,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
         "exchange-url=http://localhost:8081"
     }
 )
-public class ConversionControllerITTest {
+class ConversionControllerITTest {
     private WireMockServer wireMockServer;
 
     private static final String CONVERSION_URL = "http://localhost:%d/api/v1/convert/currency";

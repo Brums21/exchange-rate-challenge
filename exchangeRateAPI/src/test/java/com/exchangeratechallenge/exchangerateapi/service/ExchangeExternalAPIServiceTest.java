@@ -77,8 +77,8 @@ class ExchangeExternalAPIServiceTest {
 
         var exchangeDetails = exchangeExternalAPIService.getExchangeRate(fromCurrency);
 
-        assertEquals(exchangeDetails.getSourceCurrency(), "USD");
-        assertEquals(exchangeDetails.getRates().get("EUR"), 0.85);
+        assertEquals("USD", exchangeDetails.getSourceCurrency());
+        assertEquals(0.85, exchangeDetails.getRates().get("EUR"));
     }
 
     @Test
@@ -101,7 +101,7 @@ class ExchangeExternalAPIServiceTest {
             () -> exchangeExternalAPIService.getExchangeRate(fromCurrency)
         );
 
-        assertEquals(ex.getMessage(), "The provided API key was not provided or is invalid.");
+        assertEquals("The provided API key was not provided or is invalid.", ex.getMessage());
     }
 
     @Test
@@ -116,7 +116,7 @@ class ExchangeExternalAPIServiceTest {
             () -> exchangeExternalAPIService.getExchangeRate(fromCurrency)
         );
 
-        assertEquals(ex.getMessage(), "Server error 502 BAD_GATEWAY");
+        assertEquals("Server error 502 BAD_GATEWAY", ex.getMessage());
 
     }
     
@@ -131,7 +131,7 @@ class ExchangeExternalAPIServiceTest {
             () -> exchangeExternalAPIService.getExchangeRate(fromCurrency)
         );
 
-        assertEquals(ex.getMessage(), "Client error 404 NOT_FOUND");
+        assertEquals("Client error 404 NOT_FOUND", ex.getMessage());
 
     }
     
@@ -189,7 +189,7 @@ class ExchangeExternalAPIServiceTest {
             () -> exchangeExternalAPIService.getAcceptedSymbols()
         );
 
-        assertEquals(ex.getMessage(), "The provided API key was not provided or is invalid.");
+        assertEquals("The provided API key was not provided or is invalid.", ex.getMessage());
     }
 
     @Test
@@ -202,7 +202,7 @@ class ExchangeExternalAPIServiceTest {
             () -> exchangeExternalAPIService.getAcceptedSymbols()
         );
 
-        assertEquals(ex.getMessage(), "Server error 502 BAD_GATEWAY");
+        assertEquals("Server error 502 BAD_GATEWAY", ex.getMessage());
 
     }
 

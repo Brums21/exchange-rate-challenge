@@ -21,7 +21,7 @@ import com.exchangeratechallenge.exchangerateapi.services.ExchangeExternalAPISer
 import com.exchangeratechallenge.exchangerateapi.services.ExchangeService;
 
 @ExtendWith(MockitoExtension.class)
-public class ExchangeServiceTest {
+class ExchangeServiceTest {
 
     @Mock
     private ExchangeExternalAPIService exchangeExternalAPIService;
@@ -60,9 +60,9 @@ public class ExchangeServiceTest {
         when(exchangeExternalAPIService.getExchangeRate(fromCurrency)).thenReturn(exchangeAPIResponseDTO);
         
         ExchangeRate exchangeCurrent = exchangeService.getExchangeRateFromToCurrency(fromCurrency, toCurrency);
-        assertEquals(exchangeCurrent.getRate(), 0.85);
-        assertEquals(exchangeCurrent.getFromCurrency(), "USD");
-        assertEquals(exchangeCurrent.getToCurrency(), "EUR");
+        assertEquals(0.85, exchangeCurrent.getRate());
+        assertEquals("USD", exchangeCurrent.getFromCurrency());
+        assertEquals("EUR", exchangeCurrent.getToCurrency());
     
     }
 
@@ -130,10 +130,10 @@ public class ExchangeServiceTest {
             .thenReturn(exchangeAPIResponseDTO);
 
         var exchangeRates = exchangeService.getExchangeRatesFromCurrency(fromCurrency);
-        assertEquals(exchangeRates.getFromCurrency(), "USD");
-        assertEquals(exchangeRates.getRates().get("EUR"), 0.85);
-        assertEquals(exchangeRates.getRates().get("AED"), 3.672982);
-        assertEquals(exchangeRates.getRates().get("AFN"), 57.8936);
+        assertEquals("USD", exchangeRates.getFromCurrency());
+        assertEquals(0.85, exchangeRates.getRates().get("EUR"));
+        assertEquals(3.672982, exchangeRates.getRates().get("AED"));
+        assertEquals(57.8936, exchangeRates.getRates().get("AFN"));
     
     }
 
