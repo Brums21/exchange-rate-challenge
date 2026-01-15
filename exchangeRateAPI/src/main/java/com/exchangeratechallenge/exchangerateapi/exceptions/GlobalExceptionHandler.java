@@ -32,6 +32,7 @@ public class GlobalExceptionHandler {
             .body(new ErrorResponse(ex.getMessage(), Instant.now().toString()));
     }
 
+    /* Handles ContraintViolationException and returns a structured error response */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)

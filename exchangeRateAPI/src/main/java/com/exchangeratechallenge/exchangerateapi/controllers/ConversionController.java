@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.exchangeratechallenge.exchangerateapi.models.Conversion;
 import com.exchangeratechallenge.exchangerateapi.services.ConversionService;
 
 import jakarta.validation.constraints.Positive;
@@ -24,8 +25,16 @@ public class ConversionController {
         this.conversionService = conversionService;
     }
 
+    /**
+     * Endpoint to get the conversion value from one currency to one or several currencies
+     * 
+     * @param from  The currency code to convert from.
+     * @param to    The currency code(s) to convert to.
+     * @param value The value to convert to.
+     * @return A conversion object containing the converted values.
+    */
     @GetMapping("/currency")
-    public Object getExchangeRate(
+    public Conversion getExchangeRate(
         @RequestParam(name = "from", required = true) String fromCurrency,
         @RequestParam(name = "to", required = true) String toCurrency,
         @RequestParam(name = "value", required = true) @Positive(message = "Value must be greater than 0") Double value

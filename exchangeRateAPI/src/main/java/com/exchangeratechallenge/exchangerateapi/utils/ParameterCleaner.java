@@ -3,6 +3,7 @@ package com.exchangeratechallenge.exchangerateapi.utils;
 import com.exchangeratechallenge.exchangerateapi.exceptions.BadRequestException;
 import com.exchangeratechallenge.exchangerateapi.models.DTOs.ExchangeAPISymbolsDTO;
 
+/* Utils class to handle cleaning the controller's currency parameters. */
 public class ParameterCleaner {
 
     private ParameterCleaner() {}

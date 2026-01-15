@@ -13,6 +13,9 @@ import com.exchangeratechallenge.exchangerateapi.models.DTOs.ExchangeAPIResponse
 import com.exchangeratechallenge.exchangerateapi.models.DTOs.ExchangeAPISymbolsDTO;
 import com.exchangeratechallenge.exchangerateapi.utils.ParameterCleaner;
 
+/**
+ * Service class to handle conversion operations.
+ */
 @Service
 public class ConversionService {
 
@@ -24,6 +27,14 @@ public class ConversionService {
         this.exchangeExternalAPIService = exchangeExternalAPIService;
     }
 
+    /**
+     * Retrieves the conversion from a specific currency to a comma-separated list of currencies.
+     *
+     * @param fromCurrency The currency code to convert from.
+     * @param toCurrency Comma-seperated string with the currency code(s) to convert to.
+     * @return A Conversion object containing the conversion details.
+     * @throws BadRequestException if either currency is not accepted or the exchange rate is not found for one of currencies.
+     */
     public Conversion getConversionValues(String fromCurrency, String toCurrencies, Double value) {
 
         LOGGER.info("Fetching conversion values for user-defined currencies.");
