@@ -41,7 +41,7 @@ public class ConversionControllerWebMvcTest {
         Conversion mockedConversion = new Conversion();
         mockedConversion.setFromCurrency(fromCurrency);
         mockedConversion.setOriginalValue(100.0);
-        mockedConversion.setConverterCurrencies(Map.of(
+        mockedConversion.setConvertedCurrencies(Map.of(
             "EUR", 85.0,
             "GBP", 75.0,
             "JPY", 11000.0
@@ -55,9 +55,9 @@ public class ConversionControllerWebMvcTest {
                 .param("value", value))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fromCurrency").value(fromCurrency))
-                .andExpect(jsonPath("$.converterCurrencies.EUR").value(85.0))
-                .andExpect(jsonPath("$.converterCurrencies.GBP").value(75.0))
-                .andExpect(jsonPath("$.converterCurrencies.JPY").value(11000.0));
+                .andExpect(jsonPath("$.convertedCurrencies.EUR").value(85.0))
+                .andExpect(jsonPath("$.convertedCurrencies.GBP").value(75.0))
+                .andExpect(jsonPath("$.convertedCurrencies.JPY").value(11000.0));
     }
 
     @Test

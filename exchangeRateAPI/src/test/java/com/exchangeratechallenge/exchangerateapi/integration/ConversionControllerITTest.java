@@ -84,8 +84,8 @@ class ConversionControllerITTest {
             .statusCode(200)
             .body("fromCurrency", is("USD"))
             .body("originalValue", is(10.0f))
-            .body("converterCurrencies.EUR", is(8.5f))
-            .body("converterCurrencies.AFN", is(578.936f));
+            .body("convertedCurrencies.EUR", is(8.5f))
+            .body("convertedCurrencies.AFN", is(578.936f));
     }
 
     @Test

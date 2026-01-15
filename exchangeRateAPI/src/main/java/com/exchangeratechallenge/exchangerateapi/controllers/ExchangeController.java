@@ -9,9 +9,16 @@ import com.exchangeratechallenge.exchangerateapi.models.ExchangeRate;
 import com.exchangeratechallenge.exchangerateapi.models.ExchangeRates;
 import com.exchangeratechallenge.exchangerateapi.services.ExchangeService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 /**
  * Controller class to handle exchange rate related endpoints.
  */
+@Tag(name = "Exchange Controller")
 @RestController
 @RequestMapping("/api/v1/exchange")
 public class ExchangeController {
@@ -29,10 +36,16 @@ public class ExchangeController {
      * @param toCurrency   The currency code to convert to.
      * @return An ExchangeRate object containing the exchange rate details.
      */
+    @Operation(summary = "Get exchange rate between two currencies")
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "200", description = "Successfully return the exchange rate"),
+        @ApiResponse(responseCode = "400", description = "Bad request made"), 
+        @ApiResponse(responseCode = "502", description = "External API error")
+    })
     @GetMapping("/rate")
     public ExchangeRate getExchangeRate(
-        @RequestParam(name = "from", required = true) String fromCurrency,
-        @RequestParam(name = "to", required = true) String toCurrency
+        @Parameter(description = "Currency code to convert from") @RequestParam(name = "from", required = true) String fromCurrency,
+        @Parameter(description = "Currency code to convert to") @RequestParam(name = "to", required = true) String toCurrency
     ) {
         return exchangeService.getExchangeRateFromToCurrency(fromCurrency, toCurrency);
     }
@@ -43,9 +56,15 @@ public class ExchangeController {
      * @param fromCurrency The currency code to convert from.
      * @return An ExchangeRates object containing all exchange rates from the specified currency.
      */
+    @Operation(summary = "Get exchange rate from one currency to several currencies")
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "200", description = "Successfully return the conversions"),
+        @ApiResponse(responseCode = "400", description = "Bad request made"), 
+        @ApiResponse(responseCode = "502", description = "External API error")
+    })
     @GetMapping("/rates")
     public ExchangeRates getExchangeRates(
-        @RequestParam(name = "from", required = true) String fromCurrency
+        @Parameter(description = "Currency code to convert from") @RequestParam(name = "from", required = true) String fromCurrency
     ) {
         return exchangeService.getExchangeRatesFromCurrency(fromCurrency);
     }
