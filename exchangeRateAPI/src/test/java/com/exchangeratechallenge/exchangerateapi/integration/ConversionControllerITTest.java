@@ -5,8 +5,10 @@ import static org.hamcrest.Matchers.is;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.cache.CacheManager;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 
@@ -22,6 +24,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
     }
 )
 class ConversionControllerITTest {
+    
+    @Autowired
+    CacheManager cacheManager;
+
     private WireMockServer wireMockServer;
 
     private static final String CONVERSION_URL = "http://localhost:%d/api/v1/convert/currency";
@@ -62,7 +68,11 @@ class ConversionControllerITTest {
     @AfterEach
     void tearDown() {
         wireMockServer.stop();
+
+        cacheManager.getCache("symbols").clear();
+        cacheManager.getCache("exchangeRates").clear();
     }
+
 
     @Test
     void givenValidConversionRequest_whenGetConversion_thenReturnConversionResponse() {

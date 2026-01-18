@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 
 import com.exchangeratechallenge.exchangerateapi.exceptions.BadRequestException;
@@ -22,6 +24,9 @@ public class ConversionService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConversionService.class);
 
     private final ExchangeExternalAPIService exchangeExternalAPIService;
+
+    @Autowired
+    CacheManager cacheManager;
 
     public ConversionService(ExchangeExternalAPIService exchangeExternalAPIService) {
         this.exchangeExternalAPIService = exchangeExternalAPIService;
@@ -42,6 +47,7 @@ public class ConversionService {
         ExchangeAPISymbolsDTO symbolsDTO = exchangeExternalAPIService.getAcceptedSymbols();
 
         fromCurrency = ParameterCleaner.cleanAndValidateCurrency(fromCurrency, symbolsDTO);
+        
         ExchangeAPIResponseDTO exchangeRateDTO = exchangeExternalAPIService.getExchangeRate(fromCurrency);
 
         Map<String, Double> conversionMap = new HashMap<>();

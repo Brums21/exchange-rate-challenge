@@ -5,9 +5,12 @@ import static org.hamcrest.Matchers.is;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.cache.CacheManager;
 
+import com.exchangeratechallenge.exchangerateapi.services.ExchangeService;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -21,6 +24,11 @@ import io.restassured.RestAssured;
     }
 )
 class ExchangeControllerITTest {
+    @Autowired
+    CacheManager cacheManager;
+
+    @Autowired
+    ExchangeService exchangeService;
 
     private WireMockServer wireMockServer;
 
@@ -63,6 +71,9 @@ class ExchangeControllerITTest {
     @AfterEach
     void tearDown() {
         wireMockServer.stop();
+
+        cacheManager.getCache("symbols").clear();
+        cacheManager.getCache("exchangeRates").clear();
     }
 
     @Test
@@ -179,6 +190,33 @@ class ExchangeControllerITTest {
             .then()
             .statusCode(400)
             .body("error", is("Bad Request"));
+    }
+
+    @Test
+    void givenNoCache_whenCallingService_thenExternalApiIsCalled() {
+
+        String baseCurrency = "USD";
+        
+        stubListEndpointForExchangeAPI(SYMBOLS_MODEL_RESPONSE, 200);
+        stubLiveEndpointForExchangeAPI(baseCurrency, MODEL_RESPONSE, 200);
+
+        exchangeService.getExchangeRatesFromCurrency(baseCurrency);
+
+        verify(1, getRequestedFor(urlPathEqualTo("/live")));
+    }
+
+    @Test
+    void givenCachedData_whenCallingServiceAgain_thenExternalApiIsNotCalled() {
+        
+        String baseCurrency = "USD";
+        
+        stubListEndpointForExchangeAPI(SYMBOLS_MODEL_RESPONSE, 200);
+        stubLiveEndpointForExchangeAPI(baseCurrency, MODEL_RESPONSE, 200);
+
+        exchangeService.getExchangeRatesFromCurrency(baseCurrency);
+        exchangeService.getExchangeRatesFromCurrency(baseCurrency);
+
+        verify(1, getRequestedFor(urlPathEqualTo("/live")));
     }
 
     private void stubLiveEndpointForExchangeAPI(String baseCurrency, String responseBody, int code) {
