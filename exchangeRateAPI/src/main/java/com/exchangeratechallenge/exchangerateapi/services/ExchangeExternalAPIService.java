@@ -1,9 +1,14 @@
 package com.exchangeratechallenge.exchangerateapi.services;
 
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatusCode;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -40,9 +45,14 @@ public class ExchangeExternalAPIService {
      * @return An ExchangeAPIResponseDTO containing the exchange rates.
      * @throws InterruptedException 
      */
+    @Cacheable(
+        value = "exchangeRates",
+        key = "#fromCurrency",
+        sync = true
+    )
     public ExchangeAPIResponseDTO getExchangeRate(String fromCurrency) {
 
-        LOGGER.info("Fetching exchange rate from currency");
+        LOGGER.info("Fetching exchange rate from currency from external API");
 
         return webClient.get()
             .uri(uriBuilder -> uriBuilder
@@ -67,13 +77,20 @@ public class ExchangeExternalAPIService {
 
     }
 
+    @Cacheable(value="symbols", key="'symbols'")
+    public ExchangeAPISymbolsDTO getAcceptedSymbols() {
+        return fetchSymbolsFromApi();
+    }
+
     /**
      * Fetches the list of accepted currency symbols from the external API.
      *
      * @return An ExchangeAPISymbolsDTO containing the accepted symbols.
      */
-    public ExchangeAPISymbolsDTO getAcceptedSymbols() {
-        LOGGER.info("Fetching accepted symbols");
+    @CachePut(value="symbols", key="'symbols'")
+    @Scheduled(initialDelay = 0, fixedRate = 1, timeUnit = TimeUnit.HOURS)
+    public ExchangeAPISymbolsDTO fetchSymbolsFromApi() {
+        LOGGER.info("Fetching accepted symbols from external API");
 
         return webClient.get()
             .uri(uriBuilder -> uriBuilder

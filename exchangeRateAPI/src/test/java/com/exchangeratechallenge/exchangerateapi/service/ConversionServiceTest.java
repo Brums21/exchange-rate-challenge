@@ -63,8 +63,8 @@ class ConversionServiceTest {
 
         Conversion conversion = conversionService.getConversionValues(fromCurrency, toCurrency, value);
 
-        assertEquals(8.5, conversion.getConverterCurrencies().get("EUR"), 0.001);
-        assertEquals(36.72982, conversion.getConverterCurrencies().get("GBP"), 0.001);
+        assertEquals(8.5, conversion.getConvertedCurrencies().get("EUR"), 0.001);
+        assertEquals(36.72982, conversion.getConvertedCurrencies().get("GBP"), 0.001);
     }
 
     @Test

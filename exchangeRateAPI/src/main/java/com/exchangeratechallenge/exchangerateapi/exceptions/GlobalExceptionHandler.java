@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import jakarta.validation.ConstraintViolationException;
 
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /* Global exception handler for the Exchange Rate API */
 @RestControllerAdvice
@@ -16,6 +17,7 @@ public class GlobalExceptionHandler {
     
     /* Handles ExchangeAPIException and returns a structured error response */
     @ExceptionHandler(ExchangeAPIException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
     public ResponseEntity<ErrorResponse> handleExchangeAPIException(ExchangeAPIException ex) {
         return ResponseEntity
             .status(HttpStatus.BAD_GATEWAY)
@@ -27,6 +29,7 @@ public class GlobalExceptionHandler {
 
     /* Handles BadRequestException and returns a structured error response */
     @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse(ex.getMessage(), Instant.now().toString()));
@@ -34,6 +37,7 @@ public class GlobalExceptionHandler {
 
     /* Handles ContraintViolationException and returns a structured error response */
     @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .body(new ErrorResponse(ex.getConstraintViolations()

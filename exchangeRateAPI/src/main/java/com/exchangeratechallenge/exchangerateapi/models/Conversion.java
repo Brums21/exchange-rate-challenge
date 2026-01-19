@@ -18,6 +18,6 @@ public class Conversion {
     
     private String fromCurrency;
     private Double originalValue;
-    private Map<String, Double> converterCurrencies;
+    private Map<String, Double> convertedCurrencies;
 
 }
