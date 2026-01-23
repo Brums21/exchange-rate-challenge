@@ -20,7 +20,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
         "exchangeAPI=dummy",
-        "exchange-url=http://localhost:8081"
+        "exchange-url=http://localhost:8081",
+        "rate-limiter.enabled=false"
     }
 )
 class ConversionControllerITTest {

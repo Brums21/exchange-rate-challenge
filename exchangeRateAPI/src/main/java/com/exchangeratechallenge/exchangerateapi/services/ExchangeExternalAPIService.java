@@ -77,6 +77,11 @@ public class ExchangeExternalAPIService {
 
     }
 
+    /**
+     * Retrieves the list of accepted currency symbols from the external API.
+     *
+     * @return An ExchangeAPISymbolsDTO containing the accepted symbols.
+     */
     @Cacheable(value="symbols", key="'symbols'")
     public ExchangeAPISymbolsDTO getAcceptedSymbols() {
         return fetchSymbolsFromApi();

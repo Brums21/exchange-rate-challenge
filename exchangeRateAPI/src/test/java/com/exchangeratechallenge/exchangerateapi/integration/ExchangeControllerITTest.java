@@ -20,10 +20,12 @@ import io.restassured.RestAssured;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
         "exchangeAPI=dummy",
-        "exchange-url=http://localhost:8081"
+        "exchange-url=http://localhost:8081",
+        "rate-limiter.enabled=false"
     }
 )
 class ExchangeControllerITTest {
+    
     @Autowired
     CacheManager cacheManager;
 
