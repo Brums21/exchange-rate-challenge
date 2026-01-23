@@ -14,8 +14,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import com.github.tomakehurst.wiremock.client.WireMock;
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
@@ -42,7 +41,7 @@ public class ThrottlingFilterITTest {
     void setup() {
         wireMockServer = new WireMockServer(8081);
         wireMockServer.start();
-        configureFor("localhost", 8081);
+        WireMock.configureFor("localhost", 8081);
     }
 
     @AfterEach
@@ -106,19 +105,19 @@ public class ThrottlingFilterITTest {
     }
 
     private void stubLiveEndpointForExchangeAPI(String baseCurrency, String responseBody, int code) {
-        stubFor(get(urlPathEqualTo("/live"))
-            .withQueryParam("access_key", equalTo("dummy"))
-            .withQueryParam("source", equalTo(baseCurrency))
-            .willReturn(aResponse()
+        WireMock.stubFor(WireMock.get(WireMock.urlPathEqualTo("/live"))
+            .withQueryParam("access_key", WireMock.equalTo("dummy"))
+            .withQueryParam("source", WireMock.equalTo(baseCurrency))
+            .willReturn(WireMock.aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody(responseBody)
                 .withStatus(code)));
     }
 
     private void stubListEndpointForExchangeAPI(String responseBody, int code) {
-        stubFor(get(urlPathEqualTo("/list"))
-            .withQueryParam("access_key", equalTo("dummy"))
-            .willReturn(aResponse()
+        WireMock.stubFor(WireMock.get(WireMock.urlPathEqualTo("/list"))
+            .withQueryParam("access_key", WireMock.equalTo("dummy"))
+            .willReturn(WireMock.aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody(responseBody)
                 .withStatus(code)));
